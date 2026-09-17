@@ -1,98 +1,145 @@
-<div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/800px-OSIRIS_Mars_true_color.jpg" alt="Mars" width="120" style="border-radius:50%; margin-bottom: 20px;"/>
-  
-  # Mars HiRISE: Unsupervised Anomaly Detection
-  **National Students' Space Challenge (NSSC 2026) | IIT Kharagpur**
-  
-  [![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)](https://python.org)
-  [![PyTorch](https://img.shields.io/badge/PyTorch-Custom_Architecture-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org)
-  [![Status](https://img.shields.io/badge/Status-Submission_Ready-success?logo=checkmarx&logoColor=white)]()
-  [![Pipeline](https://img.shields.io/badge/Pipeline-End--to--End-8a2be2)]()
-</div>
+﻿# 🔴 Mars HiRISE Unsupervised Anomaly Detection
+
+**NSSC 2026 — National Students Space Challenge**
+**IIT Kharagpur | Data Analytics Track**
+
+[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-red?logo=pytorch)](https://pytorch.org/)
+
+An end-to-end unsupervised anomaly detection pipeline for **10,422 Mars HiRISE orbital image crops** (227x227 px). Built entirely from scratch — no pretrained weights, no arbitrary thresholds, no shortcuts.
 
 ---
 
-## 🚀 Executive Summary
-This repository contains a complete, from-scratch unsupervised machine learning pipeline to detect geological and artificial anomalies in Mars Reconnaissance Orbiter (HiRISE) imagery. 
+## Pipeline Overview
 
-Instead of relying on arbitrary heuristics or pre-trained models, we built a mathematically rigorous system combining a custom **Convolutional Autoencoder**, an **Isolation Forest** novelty engine, and a **Gaussian Mixture Model (GMM)** statistical threshold bounded by a 100-source bootstrap. We explicitly address edge-cases, document ablations (v1–v8), and provide an honest assessment of photometric bias in orbital data.
-
----
-
-## 🧠 Architecture & Pipeline
-
-### 1. Deep Latent Compression (Phase 1)
-- **Model:** 5-Stage Convolutional Autoencoder (trained from scratch).
-- **Features:** GroupNorm, SiLU activations, and a resize-convolution decoder to entirely prevent checkerboard artifacts. No skip connections are used to ensure the bottleneck forces true compression.
-- **Loss:** A hybrid of Mean Squared Error (MSE) and Structural Similarity Index (SSIM). 
-
-### 2. Isolation Forest Novelty Engine (Phase 2)
-- **Scoring:** The 256-dimensional deterministic latent vector is fed into a 2,000-tree Isolation Forest.
-- **Thresholding:** We rejected arbitrary boxplot thresholds. Instead, we dynamically fit a 4-component Gaussian Mixture Model (GMM) using Bayesian Information Criterion (BIC), extracting the tail envelope mathematically (`μ + 3σ`).
-- **Metadata Fusion:** Controlled experiments proved robust performance even when incorporating cyclically-encoded seasonal data and sun angle telemetry.
-
-### 3. Reconstruction Interpretability (Phase 3)
-- **Heatmaps:** Absolute pixel-error heatmaps identify the exact spatial location of the anomaly.
-- **Hypotheses:** Candidates are systematically mapped to the NSSC 2026 Genesis Outlier framework (Type A: Splicing, Type B: Terrestrial, Type C: Sensor Artifacts). 
-
-### 4. Design Journal & Ablations (Phase 4)
-- We completed 14 total runs. **v3** is our canonical reference model. 
-- v4–v8 serve as explicit ablation studies testing contrast normalization, footprint-masking, gradient loss, and geometric augmentation, explicitly tracking what works and what fails.
+```
+Raw Images (227x227)
+        |
+        v
+Phase 1: Convolutional Autoencoder (trained from scratch)
+        |  5-stage encoder -> 256-dim latent vector
+        |  MSE + SSIM + Gradient loss
+        |  t-SNE latent space visualisation
+        v
+Phase 2: Isolation Forest Novelty Engine
+        |  2,000-tree IsolationForest on latent vectors
+        |  GMM statistical threshold (BIC-selected)
+        |  Location analysis via source metadata
+        v
+Phase 3: Reconstruction Interpretability
+        |  Pixel-wise error heatmaps (inferno colormap)
+        |  Geological hypotheses per flagged candidate
+        v
+Phase 4: Architecture Iteration Journal (v1 to v8, 14 total runs)
+```
 
 ---
 
-## 📁 Repository Structure
+## Directory Structure
 
-```text
+```
 MarsSenitel/
-├── mars_anomaly/            # Core PyTorch ML library (Model, Loss, Datasets, Thresholding)
-├── scripts/                 # Operational execution, verification, and packaging scripts
-├── notebooks/               # Jupyter Notebooks for reporting and Colab/Kaggle execution
-├── tests/                   # 19 comprehensive unit tests verifying math contracts & shapes
-├── outputs/                 # Deep experiment tracking (JSON configs, weights, heatmaps for v1-v8)
-│   ├── v3/                  # 🏆 Canonical run outputs
-│   └── comparison/          # Cross-run stability metrics
-├── output/pdf/              # Final compiled competition PDF reports
-├── README.md                # Project Overview
-├── DEFENSE_GUIDE.md         # 40-mark presentation rehearsal and FAQ guide
-├── RESEARCH_AND_APPROACH.md # Foundational math and research context
-└── ENGINEERING_CHANGELOG.md # The step-by-step history from v1 to v8
+|
++-- notebooks/                          # Jupyter notebooks (one per phase)
+|   +-- 01_Phase1_Deep_Latent_Compression.ipynb
+|   +-- 02_Phase2_Isolation_Forest_Novelty.ipynb
+|   +-- 03_Phase3_Reconstruction_Interpretability.ipynb
+|   +-- 04_Phase4_Architecture_Journal.ipynb
+|   +-- Mars_HiRISE_Submission.ipynb   <- Full executed notebook with all outputs
+|
++-- src/                                # Core Python pipeline modules
+|   +-- model.py                        # ConvAutoencoder architecture
+|   +-- train.py                        # Training loop, checkpointing, AMP
+|   +-- evaluate.py                     # IsolationForest + GMM thresholding
+|   +-- visualize.py                    # Heatmap panels, t-SNE, score plots
+|   +-- data.py                         # PyTorch Dataset and split management
+|   +-- threshold.py                    # Statistical threshold methods
+|   +-- preprocessing.py               # Image normalization utilities
+|   +-- __init__.py
+|
++-- report/                             # Technical reports
+|   +-- Mars_HiRISE_Analysis_Report.pdf <- Final PDF submission
+|   +-- THRESHOLD_DECISION.md           <- Full threshold rationale
+|
++-- data/                               # Metadata CSVs (images not tracked in git)
+|   +-- crop_metadata_index.csv
+|   +-- source_image_metadata.csv
+|
++-- ENGINEERING_CHANGELOG.md            # v1-v8 iteration log (Symptom->Diagnosis->Fix)
++-- DECISION_LOG.md                     # Chronological audit trail
++-- RESEARCH_AND_APPROACH.md            # Literature review and design rationale
++-- DEFENSE_GUIDE.md                    # Presentation guide for Round 2
++-- requirements.txt
 ```
 
 ---
 
-## ⚙️ Running Locally
+## Key Technical Decisions
 
-Python 3.12 is the target environment. Install a PyTorch CUDA wheel suitable for your hardware, then install the local requirements. Ensure the `data/` folder contains the extracted `DATASETS*.zip` files.
+### Autoencoder Architecture
+- **5-stage ConvAE** from scratch: `1->16->32->64->96->128` channels
+- **Resize-convolution decoder** (no transposed convolutions, no checkerboard artifacts)
+- **GroupNorm + SiLU** throughout (stable for small batch sizes)
+- **256-dimensional bottleneck** — ablated from 128d (v1 through v3)
+- No skip connections: forces true latent compression
 
-```powershell
-# 1. Run the test suite
-.\.venv\Scripts\python.exe -m pytest -q
+### Loss Function (v7 — final)
+```
+L = 0.9 * MSE + 0.1 * (1 - SSIM) + 0.1 * Gradient
+```
+SSIM implemented from scratch with 11x11 Gaussian window (sigma=1.5). No pretrained features anywhere.
 
-# 2. Train the autoencoder (Example: Canonical v3 setup)
-.\.venv\Scripts\python.exe -m mars_anomaly.train --data data --out outputs/reproduction_v3 --version reproduction_v3 --epochs 15 --latent-dim 256 --structural-weight 0.1
+### Statistical Threshold (Phase 2.2)
+Fit Gaussian Mixture Model (1-4 components, BIC-selected) to calibration scores.
+```
+T = max_j ( mu_j + 3 * sigma_j )
+```
+- 100 source-group bootstrap resamples -> 95% CI: **[0.533, 0.555]**
+- Final threshold: **T = 0.539**
+- Zero flags is an accepted outcome — threshold is never manually lowered
 
-# 3. Evaluate and threshold with the Gaussian Mixture Model
-.\.venv\Scripts\python.exe -m mars_anomaly.evaluate --data data --run outputs/reproduction_v3 --method mixture_three_sigma --trees 2000
+### Engineering Iterations (v1 -> v8)
 
-# 4. Project latent spaces for visualization (t-SNE)
-.\.venv\Scripts\python.exe scripts/project_latents.py --directory outputs/reproduction_v3/mixture_three_sigma_trees2000
+| Version | Key Change | Outcome |
+|---------|------------|---------|
+| v1 | MSE baseline, 128d | Texture blurring identified |
+| v2 | + SSIM loss | SSIM 0.661 -> 0.672 |
+| v3 | 128d -> 256d | MSE 0.002694 -> 0.002599 |
+| v4 | Contrast normalization | Border artifacts; not promoted |
+| v5 | Footprint masking | 42 flags (too many); rejected |
+| v6 | Fixed near-black mask | Stripe artifacts; negative result |
+| **v7** | **+ Gradient loss** | **Final pipeline — breaks brightness confound** |
+| v8 | Augmentation (flip/rotate) | Zero flags; not promoted |
+
+---
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Open phase-by-phase notebooks
+jupyter notebook notebooks/01_Phase1_Deep_Latent_Compression.ipynb
+
+# Or open the full executed submission notebook
+jupyter notebook notebooks/Mars_HiRISE_Submission.ipynb
 ```
 
 ---
 
-## ☁️ Running on Colab/Kaggle
-Open `notebooks/Mars_HiRISE_Submission.ipynb` in a GPU runtime. Upload the raw competition dataset ZIP. The notebook contains all preprocessing, model architecture, training, and scoring loops in one readable sequence.
+## Results
+
+| Metric | Value |
+|--------|-------|
+| Final threshold T | **0.539** (95% CI: 0.533 to 0.555) |
+| Flagged anomalies | **6 crops** from 3 source observations |
+| Validation SSIM (v7) | 0.674 |
+| Validation MSE (v7) | 0.002599 |
+| Forest-seed Spearman | > 0.96 across all seed repeats |
+| Total experiments | **14 runs** (v1-v8 + 6 robustness checks) |
 
 ---
 
-## 📜 Submission Compliance & Honesty
-This repository complies completely with the NSSC 2026 rules:
-1. **No Pretrained Models:** Every weight is initialized randomly.
-2. **No Data Leakage:** Source-level grouping ensures crops from the same master image never cross train/val boundaries.
-3. **Honest Thresholding:** We never manually lowered the threshold just to force 5 candidates. The math dictates the cut-off.
-4. **Transparent Failures:** We retained negative results (e.g., border artifacts in v4) to prove scientific rigor.
-
-<div align="center">
-  <i>Developed for the NSSC 2026 Data Analytics Problem Statement.</i>
-</div>
+## Team
+NSSC 2026 | IIT Kharagpur | Data Analytics Track

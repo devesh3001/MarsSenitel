@@ -1,9 +1,0 @@
-{
-  "crops": 10422,
-  "any_mask": 2577,
-  "all_masked": 0,
-  "over_half_masked": 3,
-  "median_masked_fraction": 0.0,
-  "p95_masked_fraction": 0.26877777562149463,
-  "max_masked_fraction": 0.569155232975606
-}

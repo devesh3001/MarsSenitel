@@ -1,51 +1,63 @@
 # ============================================================
-# NSSC 2026 Mars HiRISE — .gitignore
+# MarsSenitel — NSSC 2026 Mars HiRISE Anomaly Detection
+# .gitignore
 # ============================================================
 
-# Competition dataset — large; do not redistribute
-data/
+# ── Dataset & large files ───────────────────────────────────
+data/images/
 DATASETS-*.zip
 *.zip
+DA PS 26*.docx
+DATA_DESCRIPTION.docx
+RULES AND REGULATIONS.docx
 
-# Python virtual environment
+# ── Model outputs & checkpoints (too large for git) ─────────
+outputs/
+output/submission/
+scratch_restore/
+tmp/
+
+# ── Internal dev notes (not relevant to judges) ─────────────
+docx_contents.txt
+extract_old.py
+read_docx.py
+BORDER_EXPERIMENT_PROTOCOL.md
+V7_GRADIENT_EXPERIMENT_PROTOCOL.md
+IMPROVEMENT_PROTOCOL.md
+IMPROVEMENT_RESULTS.md
+FOLDER_AUDIT_REPORT.md
+CURRENT_PROGRESS.md
+SUBMISSION_CHECKLIST.md
+RESULTS.md
+
+# ── Python environment ──────────────────────────────────────
 .venv/
 venv/
 env/
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
 
-# Pytest cache
+# ── Test & coverage ─────────────────────────────────────────
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Jupyter checkpoints
+# ── Jupyter ──────────────────────────────────────────────────
 .ipynb_checkpoints/
 
-# OS artefacts
+# ── OS artefacts ─────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# IDE
+# ── IDE ──────────────────────────────────────────────────────
 .vscode/settings.json
 .idea/
 *.swp
 *.swo
 
-# Intermediate training checkpoints (only best.pt is kept per run)
-outputs/*/checkpoints/
-
-# Large audit images (kept in audit JSON, not needed for grading)
-outputs/audit/*_image*
-
-# Smoke / scratch runs
-outputs/smoke/
-tmp/
-
-# Submission ZIP (generated locally; graders use the GitHub repo directly)
-output/submission/*.zip
-
-# NOTE: *.pt (model weights) and *.joblib (detector artifacts) are INCLUDED
-# They are required evidence for Phase 4 reproducibility and fusion diagnostics.

@@ -1,9 +1,0 @@
-{
-  "common_heldout_images": 1253,
-  "reference_flags": [],
-  "repeat_flags": [
-    "sample_00216.jpg"
-  ],
-  "jaccard": 0.0,
-  "spearman": 0.9657900940520316
-}
