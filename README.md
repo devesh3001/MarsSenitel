@@ -1,4 +1,4 @@
-﻿# 🔴 Mars HiRISE Unsupervised Anomaly Detection
+# 🔴 Mars HiRISE Unsupervised Anomaly Detection
 
 **NSSC 2026 — National Students Space Challenge**
 **IIT Kharagpur | Data Analytics Track**
@@ -58,7 +58,7 @@ MarsSenitel/
 |   +-- __init__.py
 |
 +-- report/                             # Technical reports
-|   +-- Mars_HiRISE_Analysis_Report.pdf <- Final PDF submission
+|   +-- Mars_HiRISE_Analysis_Report.pdf <- Final PDF submission (Download to view)
 |   +-- THRESHOLD_DECISION.md           <- Full threshold rationale
 |
 +-- data/                               # Metadata CSVs (images not tracked in git)
@@ -83,9 +83,9 @@ MarsSenitel/
 - **256-dimensional bottleneck** — ablated from 128d (v1 through v3)
 - No skip connections: forces true latent compression
 
-### Loss Function (v7 — final)
+### Loss Function (v3 — Canonical)
 ```
-L = 0.9 * MSE + 0.1 * (1 - SSIM) + 0.1 * Gradient
+L = 0.9 * MSE + 0.1 * (1 - SSIM)
 ```
 SSIM implemented from scratch with 11x11 Gaussian window (sigma=1.5). No pretrained features anywhere.
 
@@ -95,7 +95,7 @@ Fit Gaussian Mixture Model (1-4 components, BIC-selected) to calibration scores.
 T = max_j ( mu_j + 3 * sigma_j )
 ```
 - 100 source-group bootstrap resamples -> 95% CI: **[0.533, 0.555]**
-- Final threshold: **T = 0.539**
+- Final threshold: **T = 0.5425**
 - Zero flags is an accepted outcome — threshold is never manually lowered
 
 ### Engineering Iterations (v1 -> v8)
@@ -104,11 +104,11 @@ T = max_j ( mu_j + 3 * sigma_j )
 |---------|------------|---------|
 | v1 | MSE baseline, 128d | Texture blurring identified |
 | v2 | + SSIM loss | SSIM 0.661 -> 0.672 |
-| v3 | 128d -> 256d | MSE 0.002694 -> 0.002599 |
+| **v3** | **128d -> 256d** | **Canonical pipeline — best stable performance** |
 | v4 | Contrast normalization | Border artifacts; not promoted |
-| v5 | Footprint masking | 42 flags (too many); rejected |
+| v5 | Footprint masking | Too many flags; rejected |
 | v6 | Fixed near-black mask | Stripe artifacts; negative result |
-| **v7** | **+ Gradient loss** | **Final pipeline — breaks brightness confound** |
+| v7 | + Gradient loss | Brightness confound remains; not promoted |
 | v8 | Augmentation (flip/rotate) | Zero flags; not promoted |
 
 ---
@@ -132,10 +132,10 @@ jupyter notebook notebooks/Mars_HiRISE_Submission.ipynb
 
 | Metric | Value |
 |--------|-------|
-| Final threshold T | **0.539** (95% CI: 0.533 to 0.555) |
-| Flagged anomalies | **6 crops** from 3 source observations |
-| Validation SSIM (v7) | 0.674 |
-| Validation MSE (v7) | 0.002599 |
+| Final threshold T | **0.5425** (95% CI: 0.533 to 0.555) |
+| Flagged anomalies | **17 crops** (top 5 selected for interpretation) |
+| Validation SSIM (v3) | 0.6738 |
+| Validation MSE (v3) | 0.002599 |
 | Forest-seed Spearman | > 0.96 across all seed repeats |
 | Total experiments | **14 runs** (v1-v8 + 6 robustness checks) |
 
