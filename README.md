@@ -18,14 +18,53 @@
 
 ---
 
-## 🏆 Why This Pipeline Wins (Key Innovations)
+## 🌟 Core Technical Innovations
 
-Instead of relying on arbitrary heuristics or pre-trained models, we built a mathematically rigorous system that strictly adheres to the competition constraints:
+We built a mathematically rigorous system that strictly adheres to the competition constraints:
 
 1. **Built 100% From Scratch:** No pretrained weights (VGG/ResNet) were used. The **5-Stage Convolutional Autoencoder** was designed and trained entirely from scratch, ensuring true latent compression without data leakage.
 2. **Mathematically Honest Thresholding:** We explicitly rejected arbitrary boxplot thresholds. Instead, we used the **Bayesian Information Criterion (BIC)** to dynamically fit a Gaussian Mixture Model (GMM) to the Isolation Forest scores, extracting the anomaly tail mathematically via a 100-source bootstrap.
 3. **No Checkerboard Artifacts:** We designed a **resize-convolution decoder** rather than using standard transposed convolutions, completely eliminating checkerboard artifacts in the reconstruction heatmaps.
 4. **Transparent Ablations (v1–v8):** We documented 14 total runs. We explicitly retained and documented our negative results (e.g., border artifacts in v4, augmentation collapse in v8) to prove scientific rigor.
+
+---
+
+## 🔬 Key Technical Decisions
+
+### Autoencoder Architecture
+- **5-stage ConvAE** from scratch: `1->16->32->64->96->128` channels
+- **Resize-convolution decoder** (no transposed convolutions)
+- **GroupNorm + SiLU** throughout (stable for small batch sizes)
+- **256-dimensional bottleneck** — ablated from 128d (v1 through v3)
+- No skip connections: forces true latent compression
+
+### Loss Function (v3 — Canonical)
+```
+L = 0.9 * MSE + 0.1 * (1 - SSIM)
+```
+SSIM implemented from scratch with 11x11 Gaussian window (sigma=1.5). No pretrained features anywhere.
+
+### Statistical Threshold (Phase 2.2)
+Fit Gaussian Mixture Model (1-4 components, BIC-selected) to calibration scores.
+```
+T = max_j ( mu_j + 3 * sigma_j )
+```
+- 100 source-group bootstrap resamples -> 95% CI: **[0.533, 0.555]**
+- Final threshold: **T = 0.5425**
+- Zero flags is an accepted outcome — threshold is never manually lowered
+
+### Engineering Iterations (v1 -> v8)
+
+| Version | Key Change | Outcome |
+|---------|------------|---------|
+| v1 | MSE baseline, 128d | Texture blurring identified |
+| v2 | + SSIM loss | SSIM 0.661 -> 0.672 |
+| **v3** | **128d -> 256d** | **Canonical pipeline — best stable performance** |
+| v4 | Contrast normalization | Border artifacts; not promoted |
+| v5 | Footprint masking | Too many flags; rejected |
+| v6 | Fixed near-black mask | Stripe artifacts; negative result |
+| v7 | + Gradient loss | Brightness confound remains; not promoted |
+| v8 | Augmentation (flip/rotate) | Zero flags; not promoted |
 
 ---
 
