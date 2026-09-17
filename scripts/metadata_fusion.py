@@ -8,8 +8,8 @@ import joblib
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler,OneHotEncoder
 from scipy.stats import spearmanr
-from mars_anomaly.data import load_manifest
-from mars_anomaly.threshold import mixture_fence
+from src.data import load_manifest
+from src.threshold import mixture_fence
 
 
 def fusion(root=Path('.')):

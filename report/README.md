@@ -5,11 +5,11 @@
 Please use the direct download links below:
 
 ### 📥 [Download Final Report (7.3 MB)](https://github.com/devesh3001/MarsSenitel/raw/main/report/Mars_HiRISE_Final_Report.pdf)
-*Contains the complete Phase 1-4 pipeline analysis, heatmaps, and geological hypotheses.*
+**Canonical judge-facing report.** Contains the complete Phase 1–4 pipeline analysis, heatmaps, and geological hypotheses.
 
 ### 📥 [Download Analysis Report (6.1 MB)](https://github.com/devesh3001/MarsSenitel/raw/main/report/Mars_HiRISE_Analysis_Report.pdf)
-*Contains the extended breakdown of the Isolation Forest thresholding and intermediate version outputs.*
+**Archived / intermediate extended analysis retained for provenance.** This is not the canonical judge-facing report and may contain historical/intermediate wording from earlier development stages.
 
 ---
 
-*These reports were generated from the canonical `v3` pipeline and incorporate findings from the `v4-v8` ablation studies.*
+The canonical submission is `notebooks/Mars_HiRISE_Submission.ipynb` together with `Mars_HiRISE_Final_Report.pdf` and `ENGINEERING_CHANGELOG.md`. The archived analysis report is retained only as development provenance.

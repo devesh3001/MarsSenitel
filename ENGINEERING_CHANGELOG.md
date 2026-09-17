@@ -1,8 +1,8 @@
-﻿# Engineering Changelog
+# Engineering Changelog
 
 > **NSSC 2026 — Mars HiRISE Anomaly Detection**  
 > This changelog follows the **Symptom → Diagnosis → Fix → Outcome** format required by Phase 4.  
-> All 14 runs (v1–v8 + 6 robustness repeats) are documented. No result is hidden, including negative outcomes.
+> All 14 runs/checks (v1–v8 + 6 robustness repeats) are documented. No result is hidden, including negative outcomes.
 
 ---
 
@@ -11,7 +11,7 @@
 | Version | Key Change | Val MSE | Val SSIM | Flags | Decision |
 |---------|-----------|---------|----------|-------|----------|
 | v1 | Baseline: 128-dim, MSE only | 0.002694 | 0.6611 | — | Foundation established |
-| v2 | + SSIM loss (0.9 MSE + 0.1 SSIM) | 0.002740 | 0.6717 | — | SSIM improved; retained |
+| v2 | + SSIM loss (0.9 MSE + 0.1 × (1 − SSIM)) | 0.002740 | 0.6717 | — | SSIM improved; retained |
 | v3 | 128-dim → 256-dim bottleneck | 0.002599 | 0.6738 | 17 | ✅ **Canonical reference** |
 | v4 | Contrast normalization preprocessing | — | — | high | Artifacts; not promoted |
 | v5 | + Footprint masking (connected zeros) | — | — | 42 | Too many flags; rejected |
@@ -39,7 +39,7 @@ Encoder: Conv2d(1→16→32→64→96→128), stride=2, GroupNorm, SiLU
 Bottleneck: Linear → 128-dim
 Decoder: Resize-Conv (bilinear upsample + Conv2d), no skip connections
 ```
-- **Why resize-conv?** Transposed convolutions produce checkerboard artifacts. Resize-conv avoids this entirely (see [Odena et al., 2016](https://distill.pub/2016/deconv-checkerboard/)).
+- **Why resize-conv?** Resize-convolution avoids the uneven-overlap mechanism associated with transposed convolutions and therefore reduces checkerboard-artifact risk (see [Odena et al., 2016](https://distill.pub/2016/deconv-checkerboard/)).
 - **Why no skip connections?** Skip connections allow the decoder to bypass the bottleneck, destroying the anomaly detection signal. The bottleneck *must* force genuine compression.
 
 #### Loss
@@ -116,7 +116,7 @@ Effective rank analysis of v2's latent covariance showed that the 128 dimensions
 
 **⚠️ Known Limitation:** All 5 selected candidates fall in the top 0.3% brightness percentile of the full dataset. This suggests the Isolation Forest is partially responding to extreme photometric values rather than purely structural anomalies. This bias is disclosed rather than hidden.
 
-**Decision:** ✅ **v3 is the canonical reference.** Best reconstruction quality + stable threshold + honest limitation disclosed.
+**Decision:** ✅ **v3 is the canonical reference.** It provided the selected stability/reconstruction-quality trade-off, a reproducible calibrated threshold, and no later ablation resolved the main confounds sufficiently to justify promotion.
 
 ---
 
@@ -237,8 +237,9 @@ Adding an explicit gradient loss term (penalising differences in horizontal and 
 #### Fix
 ```
 L = 0.9 × MSE + 0.1 × (1 − SSIM) + 0.1 × GradientError
-GradientError = MSE(∇x̂, ∇x)    # adjacent-pixel differences, both axes
+GradientError = 0.5 × (mean(|Δx_target − Δx_reconstruction|) + mean(|Δy_target − Δy_reconstruction|))
 ```
+The implementation uses mean absolute adjacent-pixel gradient mismatch on the horizontal and vertical axes; it is not gradient MSE.
 
 > **⚠️ Protocol Disclosure:** The original experiment protocol specified `0.8 × MSE`. The actual implementation used `0.9 × MSE`. This discrepancy was discovered after training. The saved `config.json` and source code define the actual experiment. The deviation is documented here rather than hidden.
 
@@ -267,15 +268,15 @@ Perhaps the model is overfit to a specific orientation of orbital imagery. If we
 
 #### Fix — Training
 - Added per-batch: random horizontal flip (p=0.5), random vertical flip (p=0.5), random 90° rotation (k ∈ {0,1,2,3})
-- Loss: same as v7 (0.9 MSE + 0.1 SSIM + 0.1 Gradient)
+- Loss: same as v7 (`0.9 × MSE + 0.1 × (1 − SSIM) + 0.1 × GradientError`)
 
 #### Fix — Metadata Fusion (Phase 2.4 Optional)
-As a separate controlled experiment, the latent vector was concatenated with 3 metadata features:
-- `sun_angle`: min-max normalised
-- `season`: sin/cos cyclic encoding
-- `resolution`: min-max normalised
+As a separate controlled experiment, the 256-dimensional image latent was concatenated with three supplied metadata variables encoded on the training rows only:
+- `sun_angle`: standardized with `StandardScaler`
+- `resolution`: standardized with `StandardScaler`
+- `season`: one-hot encoded with `OneHotEncoder`
 
-Two matched 5-forest ensembles were run (image-only vs fused) to isolate the metadata effect.
+The encoded metadata contributes 6 dimensions, giving a 262-dimensional fused vector. Two matched five-forest ensembles were run (image-only vs fused) to isolate the metadata effect.
 
 #### Outcome — Augmentation
 | Metric | v7 | v8 | Change |
@@ -284,18 +285,23 @@ Two matched 5-forest ensembles were run (image-only vs fused) to isolate the met
 | Val SSIM | 0.6746 | 0.6686 | **−0.9%** ❌ Worse |
 | Image-only flags | 17 | **0** | Complete collapse |
 
-**Why did augmentation fail?** Random flips force the model to be *brightness-position invariant*. But in Mars HiRISE, brightness IS partially the signal (illumination angle, terrain slope, albedo). Making the model invariant to it also makes it blind to it — killing the anomaly signal.
+**Interpretation:** Augmentation worsened the measured reconstruction metrics and produced zero thresholded candidates. Altered orientation/illumination cues are a plausible explanation, but this experiment does not establish a unique causal mechanism.
 
 #### Outcome — Metadata Fusion
 | Feature | Value |
 |---------|-------|
-| Image-only threshold | 0.6025 | Flags: 0 |
-| Fused threshold | 0.6118 | Flags: 0 |
-| All-crop Spearman | **0.998** |
-| Added by fusion | 0 |
-| Removed by fusion | 0 |
+| Image-only dimensions | 256 |
+| Fused dimensions | 262 |
+| Image-only threshold | **0.555633** | 
+| Fused threshold | **0.554207** |
+| Image-only flags | 0 |
+| Fused flags | 0 |
+| All-crop Spearman | **0.997742** |
+| Added by fusion | `[]` |
+| Removed by fusion | `[]` |
+| Flag-set Jaccard | **null / undefined (empty union)** |
 
-**Finding:** Spearman of 0.998 confirms metadata adds essentially no new ordering information. Zero flags is retained honestly. No bonus score claimed from fusion.
+**Finding:** The score ordering changed very little in this controlled v8 comparison (Spearman 0.997742). Both thresholded sets are empty, so Jaccard is undefined rather than perfect agreement. This does not establish that metadata is universally irrelevant, and it does not measure detection accuracy or guarantee bonus marks.
 
 **Decision:** ❌ Augmentation variant not promoted. Metadata fusion experiment is completed and documented. v3 remains canonical.
 
@@ -304,10 +310,10 @@ Two matched 5-forest ensembles were run (image-only vs fused) to isolate the met
 ## Summary: Why v3 is the Canonical Reference
 
 | Criterion | v3 | All others |
-|-----------|----|-|
-| Best reconstruction quality (MSE+SSIM) | ✅ | Lower or equal |
+|-----------|----|------------|
+| Selected stability / reconstruction-quality trade-off | ✅ | Later variants did not justify promotion |
 | Stable threshold (GMM BIC) | ✅ Consistent | v4/v5 unstable |
-| Forest stability (Jaccard ≥ 0.5) | 0.667/0.727 | v7: 0.417 |
+| Fixed-latent forest-repeat stability | Jaccard 0.667/0.727 | v7 seed repeat: 0.417 |
 | Consistent candidate set | ✅ | v4-v8: inconsistent |
 | No disqualifying artifacts | ✅ | v4-v6: border stripes |
 | Honest limitation disclosed | ✅ Brightness bias | — |
@@ -316,15 +322,15 @@ Two matched 5-forest ensembles were run (image-only vs fused) to isolate the met
 
 ## Reproducibility Notes
 
-- All 14 runs use the same grouped train/val/calibration split (seed 2026)
-- Each run's exact configuration is in `outputs/<run>/config.json`
-- Environment pinned in `outputs/<run>/environment.json`
+- Primary v1–v8 experiments use the canonical grouped train/validation/calibration split with split seed 2026; robustness experiments intentionally include alternate model seeds and alternate source splits.
+- Each run's exact configuration is in `outputs/<run>/config.json`.
+- Environment pinned in `outputs/<run>/environment.json`.
 - To reproduce the canonical v3 run:
 ```bash
-python -m mars_anomaly.train \
+python -m src.train \
   --data data --out outputs/repro_v3 --version repro_v3 \
   --epochs 15 --latent-dim 256 --structural-weight 0.1
-python -m mars_anomaly.evaluate \
+python -m src.evaluate \
   --data data --run outputs/repro_v3 \
   --method mixture_three_sigma --trees 2000
 ```

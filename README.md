@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/800px-OSIRIS_Mars_true_color.jpg" alt="Mars" width="120" style="border-radius:50%; margin-bottom: 20px;"/>
   
   # 🔴 Mars HiRISE: Unsupervised Anomaly Detection
@@ -23,8 +23,8 @@
 We built a mathematically rigorous system that strictly adheres to the competition constraints:
 
 1. **Built 100% From Scratch:** No pretrained weights (VGG/ResNet) were used. The **5-Stage Convolutional Autoencoder** was designed and trained entirely from scratch, ensuring true latent compression without data leakage.
-2. **Mathematically Honest Thresholding:** We explicitly rejected arbitrary boxplot thresholds. Instead, we used the **Bayesian Information Criterion (BIC)** to dynamically fit a Gaussian Mixture Model (GMM) to the Isolation Forest scores, extracting the anomaly tail mathematically via a 100-source bootstrap.
-3. **No Checkerboard Artifacts:** We designed a **resize-convolution decoder** rather than using standard transposed convolutions, completely eliminating checkerboard artifacts in the reconstruction heatmaps.
+2. **Mathematically Honest Thresholding:** We explicitly rejected arbitrary boxplot thresholds. Instead, we used the **Bayesian Information Criterion (BIC)** to dynamically fit a Gaussian Mixture Model (GMM) to the Isolation Forest scores, extracting the anomaly tail mathematically via **100 source-group bootstrap resamples**.
+3. **Reduced Checkerboard Artifact Risk:** We designed a **resize-convolution decoder** rather than using transposed convolutions. This avoids the uneven-overlap mechanism associated with transposed-convolution checkerboard artifacts and reduces that artifact risk in reconstructions.
 4. **Transparent Ablations (v1–v8):** We documented 14 total runs. We explicitly retained and documented our negative results (e.g., border artifacts in v4, augmentation collapse in v8) to prove scientific rigor.
 
 ---
@@ -59,7 +59,7 @@ T = max_j ( mu_j + 3 * sigma_j )
 |---------|------------|---------|
 | v1 | MSE baseline, 128d | Texture blurring identified |
 | v2 | + SSIM loss | SSIM 0.661 -> 0.672 |
-| **v3** | **128d -> 256d** | **Canonical pipeline — best stable performance** |
+| **v3** | **128d -> 256d** | **Canonical pipeline — selected stability/quality trade-off** |
 | v4 | Contrast normalization | Border artifacts; not promoted |
 | v5 | Footprint masking | Too many flags; rejected |
 | v6 | Fixed near-black mask | Stripe artifacts; negative result |
@@ -70,12 +70,12 @@ T = max_j ( mu_j + 3 * sigma_j )
 
 ## 📊 Final Results at a Glance
 
-Our canonical pipeline (**v3**) identified **17 anomalous crops** from the 10,422 image dataset, using a statistically sound, data-driven threshold.
+Our canonical pipeline (**v3**) **flagged 17 candidate crops** from the 10,422 image dataset using a statistically defined, data-driven threshold. Hidden labels are unavailable, so these are screening candidates rather than confirmed anomalies.
 
 | Metric | Result |
 |--------|--------|
 | **Final Threshold (T)** | **0.5425** *(95% CI: 0.535 to 0.550)* |
-| **Flagged Anomalies** | **17 crops** (Top 5 selected for geological hypotheses) |
+| **Flagged Candidates** | **17 crops** (Top 5 selected for geological hypotheses) |
 | **Validation SSIM** | **0.6738** |
 | **Validation MSE** | **0.002599** |
 | **Forest-Seed Stability** | **> 0.96 Spearman rank** across all repeats |
@@ -112,8 +112,8 @@ MarsSenitel/
 │   ├── 03_Phase3_Reconstruction_Interpretability.ipynb
 │   └── 04_Phase4_Architecture_Journal.ipynb
 ├── report/                             # Technical Reports
-│   ├── Mars_HiRISE_Final_Report.pdf    # 📥 DOWNLOAD LINK ABOVE
-│   └── Mars_HiRISE_Analysis_Report.pdf 
+│   ├── Mars_HiRISE_Final_Report.pdf    # ⭐ Canonical judge-facing report
+│   └── Mars_HiRISE_Analysis_Report.pdf # Archived/intermediate extended analysis
 ├── src/                                # Core PyTorch ML library
 │   ├── model.py                        # ConvAutoencoder architecture
 │   ├── evaluate.py                     # IsolationForest + GMM
@@ -133,7 +133,7 @@ Python 3.11/3.12 is the target environment. Ensure the `data/` folder contains t
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Run the test suite (19 unit tests)
+# 2. Run the test suite (21 unit tests)
 pytest -q
 
 # 3. Open the main submission notebook
