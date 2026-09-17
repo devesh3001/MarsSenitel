@@ -140,6 +140,15 @@ pytest -q
 jupyter notebook notebooks/Mars_HiRISE_Submission.ipynb
 ```
 
+## 📈 Evaluation for Judges
+
+If you have a ground truth CSV file with labels (containing `filename` and `label` columns, where `label=1` indicates an anomaly), you can easily calculate metrics such as ROC-AUC, PR-AUC, and F1 Score using our provided evaluation script.
+
+```bash
+# Calculate metrics using the canonical model (v7) output
+python scripts/evaluate_labels.py --labels path/to/your_ground_truth.csv
+```
+
 <div align="center">
   <i>Developed for the NSSC 2026 Data Analytics Problem Statement.</i>
 </div>
