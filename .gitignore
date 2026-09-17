@@ -1,0 +1,51 @@
+# ============================================================
+# NSSC 2026 Mars HiRISE — .gitignore
+# ============================================================
+
+# Competition dataset — large; do not redistribute
+data/
+DATASETS-*.zip
+*.zip
+
+# Python virtual environment
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Pytest cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Intermediate training checkpoints (only best.pt is kept per run)
+outputs/*/checkpoints/
+
+# Large audit images (kept in audit JSON, not needed for grading)
+outputs/audit/*_image*
+
+# Smoke / scratch runs
+outputs/smoke/
+tmp/
+
+# Submission ZIP (generated locally; graders use the GitHub repo directly)
+output/submission/*.zip
+
+# NOTE: *.pt (model weights) and *.joblib (detector artifacts) are INCLUDED
+# They are required evidence for Phase 4 reproducibility and fusion diagnostics.

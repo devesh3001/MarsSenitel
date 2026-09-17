@@ -1,0 +1,72 @@
+Tab 1
+NSSC 2026
+ NATIONAL STUDENTS’ SPACE CHALLENGE 
+INDIAN INSTITUTE OF TECHNOLOGY, KHARAGPUR 
+DATA ANALYTICS
+Unsupervised Anomaly Detection in Mars HiRISE Orbital Imagery
+                Credit: NASA/JPL-Caltech/University of Arizona
+MOTIVATION:
+The HiRISE camera aboard the Mars Reconnaissance Orbiter has produced one of the richest visual records of another planet's surface (hundreds of thousands of images of craters, dune fields, polar terrain, and geological features shaped by billions of years of Martian history). Buried within that archive are rare frames that do not belong: sensor artifacts, spliced or corrupted crops, and occasionally imagery that has been contaminated with non-Martian content.
+Finding those rare frames without ever being told what they look like is a difficult and useful problem. It mirrors the real workflow of a planetary-imaging pipeline, where mission scientists cannot manually label every frame and must instead rely on models that compress, represent, and flag deviations from normal surface structure.
+This challenge asks participants to build that pipeline end-to-end: learn a compact representation of the dominant Martian imagery distribution, then use that representation to isolate and explain what does not fit.
+OBJECTIVE OF THE ANALYSIS:
+The primary objective of this analysis is to design and implement an end-to-end, unsupervised novelty detection pipeline for geological imagery using a custom-built deep generative autoencoder. By operating without pre-trained extractors or ground-truth labels, the analysis focuses on mapping robust latent space representations and establishing statistically defensible anomaly thresholds. Ultimately, the project aims to bridge the gap between abstract machine learning and actionable physical insights by integrating acquisition metadata, generating interpretable reconstruction-error heatmaps, and rigorously documenting the iterative engineering cycle of failure, diagnosis, and resolution
+PROBLEM STATEMENT
+1. Phase 1:Deep Latent Compression (Autoencoders) (30 points)
+1.1 Architecture Design (10 points)
+•      Architect a Convolutional or Variational Autoencoder from scratch to compress each 227×227 image into a fixed-length, one-dimensional latent vector. Participants may use standard neural-network layers and deep-learning frameworks, but may not use pretrained weights, pretrained feature extractors, or transfer learning from external datasets.
+•      Pre-trained backbones are banned, so teams must reason about their own encoder/decoder depth, stride choices, and bottleneck dimensionality.
+•      Justify the chosen latent dimensionality (such as 128, 256, or 512) as a tradeoff between reconstruction fidelity and downstream outlier separability.
+•      The representation passed to the Isolation Forest in Phase 2 must be a fixed-length 1D latent vector for every image.
+1.2 Loss Function Design (10 points)
+•      Teams have freedom to design their reconstruction loss using differentiable loss components of their choice. Well-justified formulations, such as combinations of MSE and SSIM, will be rewarded for their ability to preserve fine Martian surface structures while maintaining accurate reconstructions. 
+•      A pure-MSE objective can produce overly smooth reconstructions when fine-scale image structures are difficult to reproduce. Teams should consider how their chosen loss function affects the preservation of features such as craters, ridgelines, and other high-frequency terrain details. 
+•      Perceptual loss may be used only if it does not rely on a pretrained feature extractor. Pretrained feature extractors such as VGG or ResNet may not be used to calculate perceptual loss.
+•      In the changelog, articulate why a particular loss combination was chosen and what visual artifact it was meant to fix.
+1.3 Latent Space Visualisation (10 points)
+•      Perform dimensionality reduction (t-SNE or UMAP) on the learned latent vectors to visually assess whether the learned latent space exhibits meaningful structure.
+•      The visualization should be treated as a qualitative diagnostic, not proof of geological clustering or encoder collapse.
+•      A projection showing one dense, structureless blob may indicate that the representation is not capturing useful variation and should be investigated before Phase 2, but the visualization alone should not be treated as conclusive evidence of encoder collapse.
+•      Participants may annotate visually distinguishable structures where appropriate, but such annotations should be presented as visual interpretations, not confirmed labels.
+2. Phase 2:Isolation Forest Novelty Engine (20 points)
+2.1 Novelty Scoring (5 points)
+•      Feed the Phase 1 latent vectors, rather than raw pixels, into an Isolation Forest to generate continuous “Novelty Scores.”
+•      For the purposes of this competition: Higher Novelty Score = greater anomalousness.
+•      Different Isolation Forest implementations may use different score conventions. Participants using a library whose native score follows the opposite convention must transform the score accordingly before using it for thresholding, ranking, or visualisation.
+•      The final Novelty Score used throughout Phase 2 and Phase 3 must follow the competition convention above.
+•      Using the latent representation keeps the anomaly detector computationally cheap while operating on a space that already encodes geological structure.
+2.2 Statistical Thresholding (9 points)
+•      Arbitrary fixed-count cutoffs are not acceptable.
+•      Participants must mathematically justify a statistical threshold boundary using the observed Novelty Score distribution, standard-deviation bounds, or density-based analysis.
+•      In practice, teams should plot the sorted Novelty Score distribution, identify a defensible cutoff, and explain why that specific threshold was chosen instead of an arbitrary fixed count.
+•      If using a distribution-based method such as μ + kσ, participants should consider whether the observed score distribution supports that choice rather than assuming a Gaussian distribution.
+•      If using an elbow-based method, participants must explain how the elbow was identified.
+•      A well-reasoned boundary with slightly worse recall is preferred over an unjustified fixed top-N cutoff.
+Contamination Parameter
+•      Participants must not use an assumed contamination fraction to determine the final anomaly count.
+•      If an Isolation Forest implementation uses a contamination parameter, participants must clearly state the value and explain how the final statistically justified Novelty Score threshold was determined independently of an assumed anomaly count.
+2.3 Image Location Analysis (6 points)
+•      Novelty scoring alone tells you which crops are anomalous, not where on Mars they came from or whether that matters.
+•      A ready-made source_image_metadata.csv is provided (columns: source_image_id, latitude, longitude, sun_angle, season, resolution) covering all ≈180 source HiRISE observations the crops were extracted from.
+•      Join this metadata onto the novelty-scored crops by matching each crop back to its source_image_id as provided in the competition data.
+•      Scraping metadata directly from the PDS/HiRISE catalog is out of scope.
+2.4 Optional Metadata Fusion (+2 points)
+•      Teams that finish early may experiment with metadata fusion by concatenating the Phase 1 image embedding with an encoded metadata vector derived from the provided metadata, such as normalized sun angle and encoded season, and feeding the fused vector into the Isolation Forest. Teams should report whether and how the set of flagged images changes compared with the image-only pipeline.
+•      The image-only latent representation and anomaly-detection pipeline remain the primary Phase 2 task.
+3. Phase 3:Reconstruction Interpretability (25 points)
+3.1 Pixel-Wise Error Heatmaps (15 points)
+•      After applying the statistically justified anomaly threshold, rank the images that exceed that threshold by Novelty Score.
+•      Select the five most anomalous images from this thresholded set for Phase 3. “Top 5” is a selection step after statistical thresholding, not a replacement for thresholding.
+•      Take the selected flagged images and pass them back through the Phase 1 decoder.
+•      Compute a per-pixel (or per-patch) absolute or squared error between each original crop and its reconstruction, and render it as an overlay heatmap so a viewer can see spatially where the latent representation broke down.
+•      If fewer than five images exceed the final statistically justified threshold, analyze all images that exceed the threshold rather than lowering the threshold solely to obtain five images.
+3.2 Geological Report (10 points)
+•      For each selected heatmap, provide a brief physical hypothesis for why that image was flagged.
+•      For example: error concentrated on a sharp linear feature might suggest an unfamiliar geological feature or a spliced boundary, while an error spread diffusely across the frame might suggest a sensor artifact or a non-Martian domain shift.
+•      This section is graded on the coherence of the physical reasoning tying the heatmap pattern to a plausible cause, not on being provably correct.
+•      These interpretations should be presented as hypotheses rather than definitive classifications.
+4. Phase 4:Architecture Iteration & Design Journal (25 points)
+•      Rather than grading submissions based on specific code structure or implementation syntax, teams must document the evolution of their model across an initial baseline (v1) and at least two subsequent iterations (v2 and v3). Each iteration should include a meaningful architectural, loss-function, training, or anomaly-detection change motivated by an observed problem or limitation. 
+•      Each entry should follow a symptom, diagnosis, and fix structure. Where applicable, teams should provide supporting evidence and report the outcome of the change. For instance, if v1 produces blurry reconstructions on dune textures, teams may diagnose this as excessive smoothing from a pure-MSE objective and add an SSIM term to better preserve structural detail. 
+•      Iterations do not need to improve performance, provided the observed outcome and the reasoning behind subsequent design decisions are clearly documented. 
+•The changelog is the primary artifact judges use to assess the team's iterative engineering process and design decisions.

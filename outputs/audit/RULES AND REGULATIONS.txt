@@ -1,0 +1,45 @@
+NSSC 2026
+ NATIONAL STUDENTS’ SPACE CHALLENGE 
+INDIAN INSTITUTE OF TECHNOLOGY, KHARAGPUR 
+DATA ANALYTICS
+RULES AND REGULATIONS
+Mars HiRISE Unsupervised Anomaly Detection Challenge
+General Guidelines
+●     Dataset: The problem is based on the official Mars Reconnaissance Orbiter HiRISE v3 imagery dataset, containing cropped grayscale images of the Martian surface.
+●     Dataset description: Approximately 10,000 cropped grayscale images, standardized at 227×227 pixels. All labels are stripped from the released dataset, and an undisclosed number of tampered/foreign “Genesis Outlier” samples have been injected at random positions. Neither the count nor the positions of the outliers are shared with participants.
+●     Feature Description: Provides details regarding the source image metadata supplied with the dataset.
+●     Structure: The problem statement consists of 4 major parts, each with multiple sub-problems. The weightage of each question is mentioned next to it.
+●     Tools: Participants may use any programming language or library (e.g., Python with TensorFlow, PyTorch, scikit-learn). It is preferable to use Google Colab or Jupyter Notebook as the coding environment.
+●     Submission method: Compile all files in a structured manner and upload them to GitHub (The repository created has to be kept private, with access to only other team members, while the following GitHub handles have to be compulsorily added as collaborators: (“https://github.com/SarthakXSingh09”,”https://github.com/R15HV”, “https://github.com/Shivam3473”,“https://github.com/aditohates-bugs”, “https://github.com/Dhairya646”). The repository could be made public after the results are announced.
+●     Use of AI Agents is permitted.
+Required Submissions
+Compilation Checklist
+●     Notebook: A well-documented .ipynb notebook with code and outputs.
+●     Report: A PDF report containing detailed explanations, plots, tables, thresholds, and results. All figures should be clearly labeled, and final answers should be highlighted.
+●     Engineering Changelog: Documenting the evolution of the model across at least 3 distinct iterations (v1 through v3), following a symptom → diagnosis → fix structure.
+●     Notebook organization: Each .ipynb file must have markdown headings clearly indicating which code corresponds to which question and sub-question. Failure to organize code properly may lead to disqualification.
+Team Composition & Presentation
+●     Team size: Teams of 2 to 4 participants are allowed. Collaboration and task division are encouraged.
+●     Round 2: After the first round, shortlisted teams will proceed to the second round, where each team will be given 15 minutes to present its solution on campus.
+●     Presentation style: Presentations should be clear, concise, and emphasize insights gained from the analysis.
+Evaluation Criteria
+●     Correctness and rigor of the unsupervised pipeline.
+●     Quality and justification of the statistical threshold.
+●     Clarity of the reconstruction-based interpretability analysis.
+●     Genuine engineering understanding demonstrated through the changelog and live defense.
+●     Interpretation of results in the physical and geological context of Mars.
+Problem Statement — Mark Distribution
+The problem statement carries a total of 100 MARKS, distributed across four major parts as follows:
+Phase
+Marks
+Phase 1 — Deep Latent Compression (Autoencoders)
+30
+Phase 2 — Isolation Forest Novelty Engine (incl. Phase 2.5 Location Analysis)
+20
+Phase 3 — Reconstruction Interpretability
+25
+Phase 4 — Architecture Iteration & Design Journal
+25
+Total
+100
+Scaling: Your scores will be scaled to 60 MARKS, with the remaining 40 MARKS allocated to Presentation.

@@ -1,0 +1,14 @@
+NSSC 2026
+ NATIONAL STUDENTS’ SPACE CHALLENGE 
+INDIAN INSTITUTE OF TECHNOLOGY, KHARAGPUR 
+DATA ANALYTICS
+DATASET DESCRIPTION
+Mars HiRISE Unsupervised Anomaly Detection Challenge
+Dataset: HiRISE v3 Mars Imagery
+•      Volume & Resolution: The dataset consists of ≈10,000 cropped grayscale images of the Martian surface, standardised at 227×227 pixels. Because every crop shares identical dimensions, teams can move directly to tensor loading and batch construction without writing custom resizing or padding logic.
+•      Data Readiness: The dataset is pre-processed and standardized: there is no missing-value handling, no channel-normalization decision beyond a standard rescaling, and no corrupted files to filter. The dataset is intentionally clean to allow teams to focus on architecture and analysis during the hack window instead of data janitorial work.
+•      Teams are still expected to run a quick sanity pass (visualize a random batch, check pixel value ranges) before committing to a training pipeline; this should take minutes, not hours.
+Clarification
+•      The original HiRISE crops supplied by the organisers are clean and preprocessed. The anomalies described below are intentionally injected image-content anomalies, not corrupted dataset files.
+•      The Secret Payload: All labels are stripped before release. A hidden payload of “Genesis Outliers,” comprising spliced Martian terrain, terrestrial interference, and simulated sensor-hardware glitches, has been injected at random positions among the genuine crops. Participants do not know which samples are outliers or how many exist, which forces a truly unsupervised pipeline rather than a disguised classification task.
+•      The injection mix spans three distinct anomaly classes (semantic splicing, domain-shifted terrestrial content, and synthetic sensor artifacts) so that a single naive heuristic, such as flagging only brightness outliers, cannot solve the task.
