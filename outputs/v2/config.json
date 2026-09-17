@@ -1,0 +1,13 @@
+{
+  "version": "v2",
+  "latent_dim": 128,
+  "epochs": 15,
+  "batch_size": 16,
+  "learning_rate": 0.0003,
+  "structural_weight": 0.1,
+  "gradient_weight": 0.0,
+  "seed": 2026,
+  "workers": 0,
+  "patience": 5,
+  "max_batches": 0
+}
