@@ -3,6 +3,12 @@
 # .gitignore
 # ============================================================
 
+# Personal / private files — stay local, not for public repo
+DECISION_LOG.md
+DEFENSE_GUIDE.md
+SUBMISSION_CHECKLIST.md
+CURRENT_PROGRESS.md
+
 # ── Dataset & large files ───────────────────────────────────
 data/images/
 DATASETS-*.zip
