@@ -74,13 +74,14 @@ MarsSenitel/
 
 ---
 
-## 📄 Technical Report
+## 📄 Technical Reports
 
-GitHub's native PDF viewer cannot render large documents. **Please download the final report to view it:**
+GitHub's native PDF viewer cannot render large documents. **Please download the reports to view them:**
 
-👉 **[Download Mars_HiRISE_Analysis_Report.pdf (6 MB)](https://github.com/devesh3001/MarsSenitel/raw/main/report/Mars_HiRISE_Analysis_Report.pdf)** 👈
+👉 **[Download Mars_HiRISE_Final_Report.pdf (7.3 MB)](https://github.com/devesh3001/MarsSenitel/raw/main/report/Mars_HiRISE_Final_Report.pdf)** 👈  
+👉 **[Download Mars_HiRISE_Analysis_Report.pdf (6.1 MB)](https://github.com/devesh3001/MarsSenitel/raw/main/report/Mars_HiRISE_Analysis_Report.pdf)** 👈
 
-The report contains the full Phase 1-4 breakdown, architectural diagrams, latent space t-SNE visualisations, and high-resolution Phase 3 error heatmaps.
+The reports contain the full Phase 1-4 breakdown, architectural diagrams, latent space t-SNE visualisations, and high-resolution Phase 3 error heatmaps.
 
 ---
 
