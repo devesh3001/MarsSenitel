@@ -1,0 +1,6 @@
+filename,source_image_id,latitude,longitude,sun_angle,season,resolution,split,novelty_score,reconstruction_mse,flagged,threshold_bootstrap_flag_frequency
+sample_04201.jpg,SRC_085,0.0,180.0,39.187341,N-spring,0.25,train,0.5520586800009096,0.008713657036423683,True,1.0
+sample_07899.jpg,SRC_128,90.0,0.0,56.634817,N-spring,0.5,validation,0.5518573416844808,0.0010181516408920288,True,1.0
+sample_09581.jpg,SRC_131,10.0,180.0,60.540464,N-autumn,0.5,train,0.5495050700434567,0.0003586016537155956,True,1.0
+sample_03901.jpg,SRC_154,0.0,180.0,54.770875,N-summer,0.5,train,0.5489786319463313,0.0008556631510145962,True,1.0
+sample_05391.jpg,SRC_154,0.0,180.0,54.770875,N-summer,0.5,train,0.5470247555414612,0.000713581801392138,True,0.94

@@ -1,0 +1,15 @@
+{
+  "version": "v7",
+  "latent_dim": 256,
+  "epochs": 15,
+  "batch_size": 16,
+  "learning_rate": 0.0003,
+  "structural_weight": 0.1,
+  "gradient_weight": 0.1,
+  "seed": 2026,
+  "split_seed": 2026,
+  "preprocessing": "raw",
+  "workers": 0,
+  "patience": 5,
+  "max_batches": 0
+}

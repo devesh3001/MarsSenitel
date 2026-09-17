@@ -1,0 +1,35 @@
+{
+  "run": "v8",
+  "seeds": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030
+  ],
+  "n_estimators_per_forest": 2000,
+  "dimensions": {
+    "image_only": 256,
+    "fused": 262
+  },
+  "thresholds": {
+    "image_only": 0.5556330452343075,
+    "fused": 0.554207333152199
+  },
+  "flags": {
+    "image_only": 0,
+    "fused": 0
+  },
+  "flag_jaccard": null,
+  "added_by_fusion": [],
+  "removed_by_fusion": [],
+  "spearman_all": 0.9977421218201813,
+  "input_sha256": {
+    "outputs\\v8\\mixture_three_sigma_trees2000\\latents.npy": "09375a389704cbea23f8adcf2bba9e9ff7ca9212132b282de4681a39290b9c17",
+    "outputs\\v8\\mixture_three_sigma_trees2000\\latent_filenames.npy": "d16ba2800c9b0a7d83959a642fa11c89c039115bf96932143940430dded2e324",
+    "data\\source_image_metadata.csv": "aaaf9462c6a1ff8469ebda177c487180c81652f094fb2948844c7ecd9581d081",
+    "data\\crop_metadata_index.csv": "bfccb464cba3f930a5cdfceeef655c4b47bd6c67da4bd9f2905841c7057886fe",
+    "outputs\\v8\\config.json": "063ca64e9a1fe1023bf7f47b6914c5ef53ef6d512e6e180b6671aac51be40216"
+  },
+  "interpretation": "Matched ensemble diagnostic; each boundary is fitted on its own calibration scores. Empty sets do not establish accuracy. Metadata enters only before the forest, not the decoder. No bonus score is claimed."
+}

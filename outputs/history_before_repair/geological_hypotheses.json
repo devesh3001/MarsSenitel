@@ -1,0 +1,80 @@
+{
+  "sample_07899.jpg": {
+    "evidence": "A very bright crop with irregular, fine dark mottling across most of the image. The reconstruction retains broad brightness but loses the small-scale pattern. Error is distributed through that texture rather than concentrated on a single foreign object.",
+    "hypothesis": "A bright surface mantle, potentially seasonal frost over textured polar terrain, is a plausible ordinary explanation. The supplied latitude of 90 and N-spring category are consistent with a polar-seasonal interpretation, if those coarse metadata values are representative.",
+    "alternative": "Bright dust, exposure or contrast processing could also produce this appearance. A grayscale crop cannot establish ice composition, exact location or artificial insertion. The seasonal interpretation is a hypothesis, not a catalog identification.",
+    "reference": "https://www.uahirise.org/PSP_007712_2670"
+  },
+  "sample_08288.jpg": {
+    "evidence": "A pale smooth upper region meets a darker, rougher diagonal band in the lower half. Small rounded marks and local texture remain visible. Reconstruction smooths the band, and the larger errors follow the rougher lower region.",
+    "hypothesis": "A contact between a fine bright surface covering and rougher exposed terrain could explain the contrast. Wind redistribution of bright dust is one plausible surface process, without requiring unusual material.",
+    "alternative": "Illumination across relief or image contrast processing could produce the same contrast. The isolated crop provides no reliable slope direction, physical scale or compositional evidence. Its high latent novelty does not establish a geological anomaly.",
+    "reference": "https://www.jpl.nasa.gov/images/pia03789-cerberus-wind-streaks/"
+  },
+  "sample_04609.jpg": {
+    "evidence": "Several thin, nearly parallel dark streaks cross a bright, relatively smooth background; two long streaks dominate the middle. The decoder blurs the narrow lines, so the error map traces them even though average reconstruction error is low.",
+    "hypothesis": "Wind-related removal or redistribution of a bright dust coating could expose darker streaks. This is an ordinary Martian process that can create strong directional contrast.",
+    "alternative": "Shadows, image striping or another acquisition artifact remain possible. Orientation alone cannot distinguish a wind streak from these alternatives, and neither wind direction nor slope can be recovered reliably from this crop.",
+    "reference": "https://www.jpl.nasa.gov/images/pia07132-wind-streaks-among-flows/"
+  },
+  "sample_00840.jpg": {
+    "evidence": "A bright background contains a broad diagonal textured band and scattered small rounded depressions or marks. Reconstruction preserves the diffuse band but removes many small details. Error follows the textured band and local marks.",
+    "hypothesis": "Uneven bright dust cover over a rougher surface could produce this combination of smooth and textured patches. The marks may include small depressions, but their origin cannot be resolved here.",
+    "alternative": "Shading or contrast processing could mimic material differences. This crop shares source SRC_154 with two other selected examples, so their similarity may reflect one acquisition rather than independent unusual geology.",
+    "reference": "https://www.jpl.nasa.gov/images/pia03789-cerberus-wind-streaks/"
+  },
+  "sample_05391.jpg": {
+    "evidence": "A rough, striated upper region borders a brighter, smoother lower area along an oblique boundary. Fine linear textures dominate the upper part, and the reconstruction reduces them to broad smooth forms. The error map mainly follows that lost texture.",
+    "hypothesis": "A transition between a dust-mantled surface and a more exposed textured substrate could explain the boundary. Wind erosion or deposition is a plausible process, but this image alone does not identify the landform.",
+    "alternative": "Relief-dependent lighting or radiometric processing remains an alternative. Three of the five selected crops come from SRC_154; source conditions may influence the repeated selection. No injected object is confirmed by this panel.",
+    "reference": "https://www.jpl.nasa.gov/images/pia03789-cerberus-wind-streaks/"
+  },
+  "sample_04201.jpg": {
+    "evidence": "A darker crop in the 22nd brightness percentile featuring sharp structural edges that the model struggled to reconstruct smoothly. The error map is heavily concentrated on high-frequency geometric ridges.",
+    "hypothesis": "A sharp crater edge, rocky outcrop, or potentially an injected structural anomaly. The gradient loss forces the Isolation Forest to prioritize these sharp structural discrepancies over diffuse global brightness.",
+    "alternative": "A shadow cast by a low sun-angle or a compression artifact. Its high latent novelty confirms it is structurally unusual, but ground-truth labels are needed to confirm if it is an injected payload.",
+    "reference": "https://www.uahirise.org/PSP_007712_2670"
+  },
+  "sample_09581.jpg": {
+    "evidence": "A very bright crop with high-frequency structural edges that the gradient loss heavily penalized.",
+    "hypothesis": "Potentially a sharp geological fault or an injected artifact.",
+    "alternative": "Could be ordinary bright Martian dust interacting with camera artifacts.",
+    "reference": "https://www.uahirise.org/PSP_007712_2670"
+  },
+  "sample_03901.jpg": {
+    "evidence": "A bright crop displaying unusual geometric patterns penalized heavily by the gradient loss component.",
+    "hypothesis": "Could be an injected geometric anomaly or rare bedrock exposure.",
+    "alternative": "May just be a camera compression artifact in an otherwise bright sun-lit area.",
+    "reference": "https://www.uahirise.org/PSP_007712_2670"
+  },
+  "sample_04074.jpg": {
+    "evidence": "A mid-latitude (30\u00b0N) N-winter crop captured at a high sun angle (68.7\u00b0). The reconstruction heatmap shows concentrated high-frequency error along a diagonal boundary feature bisecting the frame. The decoder successfully reproduces the broad texture on both sides but consistently fails to reconstruct the sharp linear transition between them.",
+    "hypothesis": "The sharp diagonal boundary could represent a tectonic fault scarp or a lithological contact between two distinct surface units. At 30\u00b0N in N-winter, frost deposition on one side of a topographic ridge could sharpen the albedo contrast beyond what the encoder has learned to represent from typical terrain. Alternatively, the feature may be a lava flow boundary where a younger, smoother flow abuts older, rougher terrain.",
+    "alternative": "A sharp image-processing seam or a splice boundary introduced as part of the competition's injected anomaly set ('Genesis Outliers') would produce a geometrically similar linear error signature. The boundary could also be a shadow edge from a ridge illuminated at a specific azimuth that is rare in the training data. The high sun angle (68.7\u00b0) makes deep shadow less likely but does not rule it out.",
+    "reference": "https://www.uahirise.org/PSP_007712_2670"
+  },
+  "sample_00822.jpg": {
+    "evidence": "A southern mid-latitude (-35\u00b0S) crop in N-spring, captured at a very high sun angle (79.1\u00b0) with 1.0 m/pixel resolution \u2014 the coarsest resolution in the dataset. The reconstruction error is diffusely distributed across the entire frame rather than concentrated on any single feature, and the novelty score is driven more strongly by the metadata channel (high sun angle at southern mid-latitude in N-spring) than by the image alone.",
+    "hypothesis": "The southern hemisphere in N-spring corresponds to the southern late summer, when CO\u2082 sublimation and dust devil activity peak. A diffuse error pattern at this season and location is consistent with a surface rapidly changing its albedo as a seasonal frost layer sublimates. The coarse 1.0 m/pixel resolution means each pixel represents a larger ground area than most of the training data, potentially making the texture globally unfamiliar to the encoder.",
+    "alternative": "The diffuse error could simply reflect that the encoder has seen fewer 1.0 m/pixel crops during training (most observations are at finer resolution), making any coarse-resolution image statistically unusual without implying a surface anomaly. The metadata fusion may also be overweighting the resolution channel for this crop.",
+    "reference": "https://www.jpl.nasa.gov/images/pia14869-southern-dunes/"
+  },
+  "sample_00274.jpg": {
+    "evidence": "A polar crop (latitude 90\u00b0) captured at the highest resolution in the dataset (0.25 m/pixel) during N-summer at sun angle 64.7\u00b0. The reconstruction error is concentrated on fine repeating textures that the decoder blurs into broad smooth forms. The error map shows a regular polygonal or grid-like pattern of elevated residuals.",
+    "hypothesis": "Polar terrain at 90\u00b0N in N-summer is dominated by the retreating north polar cap and its residual water-ice deposits. The fine repeating polygonal pattern visible in the error map is consistent with periglacial polygon terrain formed by freeze-thaw cycling of the shallow subsurface. Polygon troughs as narrow as 1\u20132 metres would be resolvable at 0.25 m/pixel and would produce exactly the kind of fine, high-frequency texture that the encoder struggles to reproduce.",
+    "alternative": "The high resolution (0.25 m/pixel) means this image has the finest spatial detail in the dataset. The encoder was trained on a mix of resolutions, and fine-resolution images with rich small-scale textures may systematically receive higher novelty scores simply because their textures are harder to reconstruct, not because the geological content is unusual. This is an acquisition-driven confound, not a surface anomaly.",
+    "reference": "https://www.uahirise.org/PSP_007712_2670"
+  },
+  "sample_03718.jpg": {
+    "evidence": "A low-latitude (20\u00b0N) crop in N-spring at a moderate sun angle (41.5\u00b0) and fine resolution (0.25 m/pixel). The error heatmap shows a strong localised concentration of residual error around a dark, roughly circular feature near the centre of the frame. The surrounding terrain reconstructs well, making the central feature the clear driver of the anomaly score.",
+    "hypothesis": "A well-defined dark circular feature in low-latitude spring terrain is consistent with a relatively fresh impact crater whose excavated material has a different albedo and roughness from the surrounding duricrust. Alternatively, the dark feature could be a deflation pit where wind has removed a bright dust layer to expose darker bedrock. Either process would produce a localized feature that the encoder \u2014 trained mostly on smooth and uniformly textured plains \u2014 would struggle to reconstruct faithfully.",
+    "alternative": "The localised dark feature could be an injected domain-shift anomaly (terrestrial content, a dark object, or a simulated sensor artifact) that has been digitally composited onto an otherwise normal Mars crop. The circular shape and sharp boundary are consistent with both a natural impact and an artificial insertion. Ground truth is needed to distinguish them.",
+    "reference": "https://www.uahirise.org/ESP_016954_2005"
+  },
+  "sample_02968.jpg": {
+    "evidence": "A mid-latitude (30\u00b0N) N-autumn crop at a high sun angle (69.1\u00b0) and medium resolution (0.5 m/pixel). The reconstruction error is concentrated along several thin parallel linear features running diagonally across the frame, while the broad background texture reconstructs accurately. The narrow lines produce disproportionately high error relative to their small spatial extent.",
+    "hypothesis": "Thin parallel linear features in mid-latitude autumn terrain are consistent with recurring slope lineae (RSL) or dust devil tracks. RSL are narrow, dark streaks that appear seasonally on steep slopes and are thought to involve liquid or briny water flow. Their fine width makes them difficult for a 256-dimensional encoder to represent, resulting in blurred reconstructions and concentrated residual error along the streaks.",
+    "alternative": "The thin parallel lines could also be spacecraft track artifacts, image striping from detector issues, or deliberately injected synthetic sensor-glitch content as part of the competition's 'Genesis Outliers'. Striping artifacts would produce the same geometric signature as natural linear features in the reconstruction error map.",
+    "reference": "https://www.jpl.nasa.gov/news/recurring-martian-streaks-flowing-sand-not-water/"
+  }
+}
