@@ -1,0 +1,4 @@
+run,preprocessing,validation_crops,gain,offset,median_absolute_score_change,p95_absolute_score_change,mean_input_absolute_change,median_relative_latent_change,flag_flips,original_flags,perturbed_flags
+v3,raw,512,0.8,0.1,0.007650697226094072,0.03393513173008873,0.02317020110785961,0.10791605710983276,0,0,0
+v4,contrast,512,0.8,0.1,0.0,0.002901990680410493,0.001730255433358252,4.0611666918266565e-05,0,1,1
+v5,footprint,512,0.8,0.1,0.0,4.404021041638506e-05,8.120442629433455e-08,3.662068411358632e-05,0,1,1

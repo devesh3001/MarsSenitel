@@ -1,0 +1,18 @@
+{
+  "criteria": {
+    "border_response_reduced_25_percent_vs_both": true,
+    "all_defect_responses_at_least_70_percent_and_noninferior": false,
+    "forest_jaccard_at_least_v3": false
+  },
+  "forest_min_jaccard": {
+    "v3": 0.6666666666666666,
+    "v5": 0.22727272727272727,
+    "v6": 0.5918367346938775
+  },
+  "numerical_criteria_pass": false,
+  "visual_review": "Completed: inspected the five selected heatmap panels and three preprocessing previews; multiple filled regions contain conspicuous stretched stripes.",
+  "promoted": false,
+  "note": "All 10,422 mask fractions checked. Synthetic response diagnostics do not establish hidden-anomaly accuracy. This closes the v6 experiment without changing either existing selection file.",
+  "conclusion": "Do not promote v6. It reduces border-strip response, but fails the prespecified defect-response and forest-stability criteria and introduces visible fill artifacts.",
+  "reviewed_at": "2026-09-17T16:59:22+05:30"
+}

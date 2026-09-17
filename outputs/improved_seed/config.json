@@ -1,0 +1,15 @@
+{
+  "version": "improved_seed",
+  "latent_dim": 256,
+  "epochs": 15,
+  "batch_size": 16,
+  "learning_rate": 0.0003,
+  "structural_weight": 0.1,
+  "gradient_weight": 0.0,
+  "seed": 2027,
+  "split_seed": 2026,
+  "preprocessing": "contrast",
+  "workers": 0,
+  "patience": 5,
+  "max_batches": 0
+}

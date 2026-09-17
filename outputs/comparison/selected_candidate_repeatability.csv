@@ -1,0 +1,6 @@
+filename,source_image_id,novelty_score,v3_flagged,robust_seed_flagged,robust_split_flagged,v4_flagged,v5_flagged,improved_seed_flagged,improved_split_flagged
+sample_07899.jpg,SRC_128,0.5661271365300812,True,False,True,False,False,False,False
+sample_08288.jpg,SRC_154,0.5573785008133171,True,True,False,False,False,False,False
+sample_04609.jpg,SRC_131,0.556366793004584,True,False,True,False,False,False,False
+sample_00840.jpg,SRC_154,0.5555886199254428,True,True,False,False,False,False,False
+sample_05391.jpg,SRC_154,0.5552487039178879,True,False,True,False,False,False,False
