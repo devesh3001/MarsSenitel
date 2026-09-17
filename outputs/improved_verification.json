@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-09-17T11:39:08+05:30",
+  "tests_passed": 11,
+  "test_observed_seconds": 17.79,
+  "test_command": ".venv/Scripts/python.exe -m pytest -q",
+  "completed_runs": [
+    "v1",
+    "v2",
+    "v3",
+    "robust_seed",
+    "robust_split",
+    "v4",
+    "v5",
+    "improved_seed",
+    "improved_split"
+  ],
+  "notebook_code_cells": 26,
+  "notebook_errors": 0,
+  "notebook_execution": "Executed locally, reusing completed training and detector artifacts; visible definitions and sensitivity calculations executed in the notebook",
+  "notebook_sha256": "ed4c7f3c838188a83a753b50b644ef62757f48d3b2939f9ac97783836de8b64f",
+  "pdf_pages": 15,
+  "pdf_visual_review_passed": true,
+  "pdf_review": "All final rendered pages inspected after the measured results and journal were inserted; captions, tables, images and page boundaries reviewed.",
+  "pdf_sha256": "72abf5fa3a7d62230afe7f27140848561c03377040ed3b74e6fee0396c25f329",
+  "cloud_execution_verified": false,
+  "external_submission_performed": false
+}

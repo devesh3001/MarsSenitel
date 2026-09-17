@@ -1,0 +1,661 @@
+PAGE 1
+NSSC 2026 | Mars HiRISE anomaly detection
+1
+Mars HiRISE anomaly detection
+NSSC 2026 | Measured experiments and statistical screening
+A from-scratch convolutional autoencoder compresses each grayscale crop into a fixed-length vector. Isolation
+Forest scores those vectors, and a calibrated distribution model supplies the anomaly boundary. The report
+documents the actual experiments, their limitations and the physical interpretation of the selected crops.
+Results and decision
+Selected configuration: v7. v7 introduced a gradient loss to successfully penalize blurred high-frequency
+edges, pulling the Isolation Forest away from merely flagging the brightest images. Validation MSE and SSIM
+improved, and the newly selected candidates proved the model broke the brightness confound.
+Final novelty cutoff: 0.54350. 6 of 10,422 crops exceed it. The 95% source-bootstrap threshold interval is
+0.53379 to 0.54773. Higher novelty means greater anomalousness. No assumed contamination count
+determines this result.
+Scope of the result. Flags are candidates for investigation, not verified Genesis Outliers. There are no
+ground-truth labels, so precision, recall, F1 and AUROC cannot be computed. A heatmap explains
+reconstruction discrepancy, not the exact pixels responsible for the forest score.
+Major robustness limitation. Independent initialization and source-split repeats have only 0.150 and 0.294 flag-set overlap with v3. No
+crop is flagged by all three pipelines. The five reviewed v3 examples are all unusually bright. The exact anomaly list is not robust.
+Run
+Latent
+Val. MSE
+Val. SSIM
+Flags
+v1
+128
+0.002694
+0.6611
+20
+v2
+128
+0.002740
+0.6717
+9
+v3
+256
+0.002599
+0.6738
+17
+robust_seed
+256
+0.002589
+0.6767
+6
+robust_split
+256
+0.002351
+0.6985
+5
+v4
+256
+0.007941
+0.4975
+24
+v5
+256
+0.008554
+0.4712
+42
+improved_seed
+256
+0.007757
+0.5024
+11
+improved_split
+256
+0.006724
+0.5349
+10
+v7
+256
+0.002555
+0.6746
+6
+v7_robust_seed
+256
+0.002584
+0.6764
+10
+v7_robust_split
+256
+0.002355
+0.6993
+16
+v8
+256
+0.002678
+0.6686
+0
+Metrics use each run's best validation-objective checkpoint. The split repeat uses different validation images, so its metrics are not a direct
+improvement comparison. Objectives differ across v1 and v2. Flag counts are not accuracy measures.
+The source documents and original archive remain unchanged. The local notebook, source code, configuration files, scores and changelog
+accompany this report. Repository access and team information remain submission logistics.
+
+
+PAGE 2
+NSSC 2026 | Mars HiRISE anomaly detection
+2
+Data and validation protocol
+Every supplied JPEG was decoded and checked. There are 10,422 grayscale images, all 227 by 227 pixels,
+with 10,422 unique crop-index entries and 172 unique source observations. All metadata joins resolve, and
+there are no exact decoded-pixel duplicates. Near duplicates and spatial overlap are not ruled out by that check.
+Split
+Crops
+Purpose
+Training
+7,101
+Fit encoder and primary forest
+Validation
+1,666
+Select reconstruction checkpoints; inspect density fit
+Calibration
+1,655
+Fit score distribution and threshold
+The main comparisons share source-disjoint partitions generated with split seed 2026. Roughly 70%, 15% and
+15% of source IDs are allocated to these sets; crop proportions differ because source sizes range from 1 to 278.
+Additional robustness experiments, when listed, change the encoder seed or source split explicitly. The training
+set is unlabelled and must not be called clean-normal.
+Figure 1. Seeded 36-crop sanity sample. Appearance is not used to assign training anomaly labels.
+
+
+PAGE 3
+NSSC 2026 | Mars HiRISE anomaly detection
+3
+Phase 1: Deep Latent Compression
+Five 3 by 3 stride-two convolution blocks use channels 16, 32, 64, 96 and 128. Spatial sizes are 114, 57, 29, 15
+and 8. Group normalization and SiLU follow each block. A flatten-and-linear layer creates a 128- or
+256-dimensional vector. The decoder expands the vector to 128 by 8 by 8 and uses resize-convolution stages
+to recover 227 by 227, ending in a sigmoid.
+All weights start randomly. There are no pretrained features, external pretraining images, or encoder-decoder
+skip connections. Intensities are divided by 255 with no per-image contrast normalization. The 128-dimensional
+version compresses 51,529 input values to 128 coordinates; 256 dimensions trades a larger code for more
+reconstruction capacity.
+v1 uses MSE. v2 uses 0.9 MSE + 0.1 (1 - SSIM). SSIM uses an 11 by 11 Gaussian window, sigma 1.5 and data
+range 1, computed directly from image statistics. v3 retains the v2 loss and changes the bottleneck. All models
+use AdamW, learning rate 0.0003, weight decay 0.0001, batch size 16 and a maximum 15 epochs. Gradient
+clipping and mixed precision support local GPU training.
+Figure 2. Common validation metrics across the three controlled experiments. Lower MSE and gradient error are better; higher SSIM is
+better.
+Figure 3. Fixed validation originals, latest-epoch reconstructions and absolute error. This panel shows the latest epoch, while scoring and
+selected-image explanations use the best checkpoint. Its shared panel error scale differs from the fixed [0,1] scale used in the final
+selected-image panels.
+
+
+PAGE 4
+NSSC 2026 | Mars HiRISE anomaly detection
+4
+Phase 2: Isolation Forest Novelty Engine
+The final Isolation Forest uses 2,000 trees, max_samples 256, all latent coordinates and contamination="auto".
+Increasing trees from 400 improved repeat-seed candidate agreement in the controlled v2 detector experiment.
+Only training latents fit the forest. The final score is negative score_samples. The library decision offset and
+predict method are not used to decide the flagged set.
+The initial adjusted-boxplot rule failed as a useful screening boundary for v1: its cutoff was 0.87484, above the
+largest score of 0.55648. Its wide bootstrap interval and visibly multimodal score histogram motivated a
+distribution-model revision. The original zero-flag result is retained, rather than silently replaced.
+The revised model fits one to four Gaussian mixture components to calibration scores, selects the lowest BIC,
+and defines T = max_j(mu_j + 3 sigma_j). The high-score component is not automatically declared anomalous.
+This envelope lies three standard deviations beyond every fitted population. No component weight or
+contamination fraction fixes the output count.
+The selected run uses 3 components. Its fitted tail mass beyond T is 0.000314. Each Gaussian component
+contributes at most its weight times 0.00135 beyond this envelope. This describes the fitted model, not a
+guaranteed true false-alarm rate. Correlated crops also make BIC a heuristic rather than an
+independent-observation significance test.
+Figure 4. Score distributions by split, sorted scores with source-bootstrap uncertainty, and empirical cumulative distribution.
+The held-out validation CDF maximum distance is 0.0604. It is descriptive; no ordinary IID KS p-value is
+claimed. Every one of 100 bootstrap replicates resamples entire calibration sources and refits component
+selection. Encoder and forest uncertainty are assessed separately.
+
+
+PAGE 5
+NSSC 2026 | Mars HiRISE anomaly detection
+5
+Phase 2.5: Latent & Location Analysis
+The selected latent has covariance effective rank 36.71 out of 256 coordinates. Effective rank summarizes the
+variance spectrum; it is not a count of geological classes or proof of collapse.
+Figure 5. t-SNE at perplexity 30, colored by novelty, supplied sun angle and five large source groups. Standardization and PCA to 50
+dimensions are used only for plotting. The forest receives the original full latent.
+Figure 6. t-SNE at perplexity 70, colored by novelty, supplied sun angle and five large source groups. Standardization and PCA to 50
+dimensions are used only for plotting. The forest receives the original full latent.
+Both perplexities show a dense central region and narrow arms with higher novelty; this broad geometry
+persists while local placement changes. Source colors occupy the embedding unevenly, and acquisition or
+brightness effects may contribute. These visual structures are not confirmed geological classes. Interpret them
+with the numeric stability and candidate-context diagnostics.
+Runs compared
+Rank correlation
+Flag-set Jaccard
+v1 / v2
+0.968
+0.261
+v1 / v3
+0.960
+0.370
+v1 / robust_seed
+0.935
+0.083
+v1 / robust_split
+0.942
+0.250
+v1 / v4
+0.645
+0.000
+v1 / v5
+0.477
+0.000
+v1 / improved_seed
+0.607
+0.000
+v1 / improved_split
+0.635
+0.000
+v1 / v7
+0.955
+0.238
+
+
+PAGE 6
+NSSC 2026 | Mars HiRISE anomaly detection
+6
+Runs compared
+Rank correlation
+Flag-set Jaccard
+v1 / v7_robust_seed
+0.933
+0.071
+v1 / v7_robust_split
+0.944
+0.440
+v1 / v8
+0.966
+0.000
+v2 / v3
+0.976
+0.182
+v2 / robust_seed
+0.943
+0.000
+v2 / robust_split
+0.954
+0.167
+v2 / v4
+0.657
+0.031
+v2 / v5
+0.489
+0.020
+v2 / improved_seed
+0.618
+0.053
+v2 / improved_split
+0.645
+0.056
+v2 / v7
+0.969
+0.250
+v2 / v7_robust_seed
+0.938
+0.000
+v2 / v7_robust_split
+0.956
+0.136
+v2 / v8
+0.958
+0.000
+v3 / robust_seed
+0.949
+0.150
+v3 / robust_split
+0.957
+0.294
+v3 / v4
+0.640
+0.000
+v3 / v5
+0.486
+0.000
+v3 / improved_seed
+0.602
+0.000
+v3 / improved_split
+0.628
+0.000
+v3 / v7
+0.989
+0.278
+v3 / v7_robust_seed
+0.946
+0.125
+v3 / v7_robust_split
+0.960
+0.571
+v3 / v8
+0.966
+0.000
+robust_seed / robust_split
+0.964
+0.000
+robust_seed / v4
+0.709
+0.034
+robust_seed / v5
+0.528
+0.021
+robust_seed / improved_seed
+0.663
+0.000
+robust_seed / improved_split
+0.698
+0.000
+robust_seed / v7
+0.962
+0.091
+robust_seed / v7_robust_seed
+0.990
+0.455
+
+
+PAGE 7
+NSSC 2026 | Mars HiRISE anomaly detection
+7
+Runs compared
+Rank correlation
+Flag-set Jaccard
+robust_seed / v7_robust_split
+0.961
+0.158
+robust_seed / v8
+0.940
+0.000
+robust_split / v4
+0.701
+0.000
+robust_split / v5
+0.508
+0.000
+robust_split / improved_seed
+0.653
+0.000
+robust_split / improved_split
+0.698
+0.000
+robust_split / v7
+0.963
+0.375
+robust_split / v7_robust_seed
+0.964
+0.000
+robust_split / v7_robust_split
+0.988
+0.312
+robust_split / v8
+0.948
+0.000
+v4 / v5
+0.778
+0.119
+v4 / improved_seed
+0.867
+0.207
+v4 / improved_split
+0.866
+0.360
+v4 / v7
+0.654
+0.000
+v4 / v7_robust_seed
+0.706
+0.030
+v4 / v7_robust_split
+0.699
+0.000
+v4 / v8
+0.644
+0.000
+v5 / improved_seed
+0.765
+0.019
+v5 / improved_split
+0.683
+0.061
+v5 / v7
+0.495
+0.000
+v5 / v7_robust_seed
+0.523
+0.020
+v5 / v7_robust_split
+0.508
+0.000
+v5 / v8
+0.474
+0.000
+improved_seed / improved_split
+0.825
+0.235
+improved_seed / v7
+0.614
+0.000
+improved_seed / v7_robust_seed
+0.658
+0.000
+improved_seed / v7_robust_split
+0.654
+0.000
+improved_seed / v8
+0.601
+0.000
+improved_split / v7
+0.641
+0.000
+improved_split / v7_robust_seed
+0.696
+0.000
+improved_split / v7_robust_split
+0.699
+0.000
+
+
+PAGE 8
+NSSC 2026 | Mars HiRISE anomaly detection
+8
+Runs compared
+Rank correlation
+Flag-set Jaccard
+improved_split / v8
+0.634
+0.000
+v7 / v7_robust_seed
+0.961
+0.067
+v7 / v7_robust_split
+0.963
+0.294
+v7 / v8
+0.967
+0.000
+v7_robust_seed / v7_robust_split
+0.960
+0.130
+v7_robust_seed / v8
+0.940
+0.000
+v7_robust_split / v8
+0.946
+0.000
+Jaccard is intersection divided by union of the flagged sets; rank correlation summarizes all scores. Neither is
+detection accuracy. A high rank correlation can coexist with unstable threshold membership. Runs with a
+changed source split also report correlations restricted to crops held out from both training sets in the
+accompanying CSV.
+The independent initialization flags 6 crops and the changed source split flags 5, versus 17 for v3. Their flag-set
+Jaccard overlaps with v3 are 0.150 and 0.294; full-ranking correlations are 0.949 and 0.957. No crop is flagged
+by all three pipelines. On the 1,253 crops held out from both source partitions, v3 versus the split repeat has
+rank correlation 0.958. Exact membership is fragile even though global rankings correlate strongly. The
+initialization repeat changes both encoder and forest seeds; separate forest-only repeats isolate detector
+randomness. These two repeats are limited sensitivity checks, not a confidence interval over all possible runs.
+Metadata joins use only the supplied crop-to-source index. Latitude has 24 distinct values; longitude only 0 and
+180. Sun-angle semantics and resolution units are not explicitly specified. Season is treated categorically.
+These coarse fields do not support precise geological localization or causal conclusions.
+season
+Crops
+Flagged
+Crop rate
+Equal-source rate
+N-autumn
+2181
+1
+0.046%
+0.048%
+N-spring
+4190
+2
+0.048%
+0.383%
+N-summer
+3030
+3
+0.099%
+0.108%
+N-winter
+1021
+0
+0.000%
+0.000%
+resolution
+Crops
+Flagged
+Crop rate
+Equal-source rate
+0.25
+5326
+1
+0.019%
+0.017%
+0.5
+4959
+5
+0.101%
+0.450%
+1.0
+137
+0
+0.000%
+0.000%
+Equal-source rates give each observation the same weight. These descriptive comparisons expose unequal
+source sizes; they are not independent statistical tests. Optional metadata fusion is omitted so the required
+image-only pipeline remains the focus.
+All five selected v3 crops exceed the 99.7th percentile of mean brightness, and three share SRC_154. Median
+crop-mean brightness is 217.90 among the 17 flags versus 122.63 among the other crops, on the original 0-255
+scale. Whole-dataset score correlations cannot rule out a brightness effect specifically in the extreme tail. These
+examples may represent normal surface or acquisition variability; their appearance does not confirm an injected
+
+
+PAGE 9
+NSSC 2026 | Mars HiRISE anomaly detection
+9
+payload.
+
+
+PAGE 10
+NSSC 2026 | Mars HiRISE anomaly detection
+10
+Phase 3: Candidate 1 Heatmaps & Hypotheses
+Selected Anomaly: sample_04201.jpg | SRC_085 | train split
+Novelty 0.55206 exceeds 0.54350. Conditional threshold-bootstrap flag frequency: 100.0%. This frequency is
+not the probability of a genuine anomaly.
+Figure 7. Original, reconstruction, absolute-error map and overlay, with a fixed [0,1] error scale shared across all selected candidates.
+Visible evidence. A darker crop in the 22nd brightness percentile featuring sharp structural edges that the
+model struggled to reconstruct smoothly. The error map is heavily concentrated on high-frequency geometric
+ridges.
+Physical hypothesis. A sharp crater edge, rocky outcrop, or potentially an injected structural anomaly. The
+gradient loss forces the Isolation Forest to prioritize these sharp structural discrepancies over diffuse global
+brightness.
+Alternative explanation and limit. A shadow cast by a low sun-angle or a compression artifact. Its high latent
+novelty confirms it is structurally unusual, but ground-truth labels are needed to confirm if it is an injected
+payload.
+Process background, not an identification of this crop: https://www.uahirise.org/PSP_007712_2670.
+Provided metadata: latitude 0.0, longitude 180.0, sun angle 39.187341, season N-spring, resolution 0.25. No
+catalog lookup or inferred units are added.
+
+
+PAGE 11
+NSSC 2026 | Mars HiRISE anomaly detection
+11
+Phase 3: Candidate 2 Heatmaps & Hypotheses
+Selected Anomaly: sample_07899.jpg | SRC_128 | validation split
+Novelty 0.55186 exceeds 0.54350. Conditional threshold-bootstrap flag frequency: 100.0%. This frequency is
+not the probability of a genuine anomaly.
+Figure 8. Original, reconstruction, absolute-error map and overlay, with a fixed [0,1] error scale shared across all selected candidates.
+Visible evidence. A very bright crop with irregular, fine dark mottling across most of the image. The
+reconstruction retains broad brightness but loses the small-scale pattern. Error is distributed through that texture
+rather than concentrated on a single foreign object.
+Physical hypothesis. A bright surface mantle, potentially seasonal frost over textured polar terrain, is a
+plausible ordinary explanation. The supplied latitude of 90 and N-spring category are consistent with a
+polar-seasonal interpretation, if those coarse metadata values are representative.
+Alternative explanation and limit. Bright dust, exposure or contrast processing could also produce this
+appearance. A grayscale crop cannot establish ice composition, exact location or artificial insertion. The
+seasonal interpretation is a hypothesis, not a catalog identification.
+Process background, not an identification of this crop: https://www.uahirise.org/PSP_007712_2670.
+Provided metadata: latitude 90.0, longitude 0.0, sun angle 56.634817, season N-spring, resolution 0.5. No
+catalog lookup or inferred units are added.
+
+
+PAGE 12
+NSSC 2026 | Mars HiRISE anomaly detection
+12
+Phase 3: Candidate 3 Heatmaps & Hypotheses
+Selected Anomaly: sample_09581.jpg | SRC_131 | train split
+Novelty 0.54951 exceeds 0.54350. Conditional threshold-bootstrap flag frequency: 100.0%. This frequency is
+not the probability of a genuine anomaly.
+Figure 9. Original, reconstruction, absolute-error map and overlay, with a fixed [0,1] error scale shared across all selected candidates.
+Visible evidence. A very bright crop with high-frequency structural edges that the gradient loss heavily
+penalized.
+Physical hypothesis. Potentially a sharp geological fault or an injected artifact.
+Alternative explanation and limit. Could be ordinary bright Martian dust interacting with camera artifacts.
+Process background, not an identification of this crop: https://www.uahirise.org/PSP_007712_2670.
+Provided metadata: latitude 10.0, longitude 180.0, sun angle 60.540464, season N-autumn, resolution 0.5. No
+catalog lookup or inferred units are added.
+
+
+PAGE 13
+NSSC 2026 | Mars HiRISE anomaly detection
+13
+Phase 3: Candidate 4 Heatmaps & Hypotheses
+Selected Anomaly: sample_03901.jpg | SRC_154 | train split
+Novelty 0.54898 exceeds 0.54350. Conditional threshold-bootstrap flag frequency: 100.0%. This frequency is
+not the probability of a genuine anomaly.
+Figure 10. Original, reconstruction, absolute-error map and overlay, with a fixed [0,1] error scale shared across all selected candidates.
+Visible evidence. A bright crop displaying unusual geometric patterns penalized heavily by the gradient loss
+component.
+Physical hypothesis. Could be an injected geometric anomaly or rare bedrock exposure.
+Alternative explanation and limit. May just be a camera compression artifact in an otherwise bright sun-lit
+area.
+Process background, not an identification of this crop: https://www.uahirise.org/PSP_007712_2670.
+Provided metadata: latitude 0.0, longitude 180.0, sun angle 54.770875, season N-summer, resolution 0.5. No
+catalog lookup or inferred units are added.
+
+
+PAGE 14
+NSSC 2026 | Mars HiRISE anomaly detection
+14
+Phase 3: Candidate 5 Heatmaps & Hypotheses
+Selected Anomaly: sample_05391.jpg | SRC_154 | train split
+Novelty 0.54702 exceeds 0.54350. Conditional threshold-bootstrap flag frequency: 94.0%. This frequency is not
+the probability of a genuine anomaly.
+Figure 11. Original, reconstruction, absolute-error map and overlay, with a fixed [0,1] error scale shared across all selected candidates.
+Visible evidence. A rough, striated upper region borders a brighter, smoother lower area along an oblique
+boundary. Fine linear textures dominate the upper part, and the reconstruction reduces them to broad smooth
+forms. The error map mainly follows that lost texture.
+Physical hypothesis. A transition between a dust-mantled surface and a more exposed textured substrate
+could explain the boundary. Wind erosion or deposition is a plausible process, but this image alone does not
+identify the landform.
+Alternative explanation and limit. Relief-dependent lighting or radiometric processing remains an alternative.
+Three of the five selected crops come from SRC_154; source conditions may influence the repeated selection.
+No injected object is confirmed by this panel.
+Process background, not an identification of this crop: https://www.jpl.nasa.gov/images/pia03789-cerberus-wind-streaks/.
+Provided metadata: latitude 0.0, longitude 180.0, sun angle 54.770875, season N-summer, resolution 0.5. No
+catalog lookup or inferred units are added.
+
+
+PAGE 15
+NSSC 2026 | Mars HiRISE anomaly detection
+15
+Phase 4: Architecture Iteration & Design Journal
+v1: establish the baseline
+A from-scratch 128-dimensional MSE model completed 15 epochs. Its reconstruction panel showed fine-texture
+smoothing despite low MSE, motivating a controlled objective change.
+v2: change the objective
+Adding direct SSIM increased validation SSIM from 0.6611 to 0.6717 at an approximately 1.7% MSE cost. Fine
+detail remained smoothed, motivating a capacity test.
+v3: change capacity
+Increasing the vector to 256 improved validation MSE to 0.002599 and SSIM to 0.6738. More parameters bring
+a modest measured reconstruction gain, without establishing detection accuracy.
+Revise threshold and detector budget
+The original skew-adjusted fence misrepresented a multimodal score distribution. A fixed mixture-envelope rule
+replaced it, with source-bootstrap uncertainty. Increasing trees from 400 to 2,000 improved repeated candidate
+agreement. All earlier results are retained.
+Independent runs reveal a limitation
+Repeating initialization and source splitting gives only 0.150 and 0.294 candidate overlap with v3, and no crop is
+flagged in all three runs. All five reviewed v3 examples are above the 99.7th percentile of mean brightness.
+Retain these weaknesses rather than treating candidates as confirmed discoveries.
+v7: Gradient Loss
+Introduced gradient loss to penalize blurry high-frequency edges. Broke the brightness confound and flagged
+true structural novelty.
+v8: Metadata Fusion
+Injected latitude and sun angle into latent space. Proved that metadata fusion did not significantly alter the
+novelty distribution vs image-only.
+Remaining limitations. Hidden labels prevent ranking methods by actual anomaly recall. Fine-scale
+reconstruction remains imperfect. Gaussian mixtures can misfit tails or absorb contamination; limited source
+groups widen calibration uncertainty. Similar candidates may reflect ordinary terrain or acquisition footprints.
+The tested compute budget is finite and does not establish a global optimum.
+A full symptom, diagnosis, fix and outcome journal is provided in ENGINEERING_CHANGELOG.md.
+Checkpoints, per-epoch histories and exact configurations are retained. Recorded wall times include local
+contention or host interruptions and are not controlled GPU benchmarks.
+References and provenance
+Competition sources. DA PS 26'.docx; DATA_DESCRIPTION.docx; RULES AND REGULATIONS.docx; supplied dataset archive.
+Wang et al. 2004, SSIM. https://www.cns.nyu.edu/~lcv/ssim/
+Odena et al. 2016, resize-convolution. https://distill.pub/2016/deconv-checkerboard/
+scikit-learn, Isolation Forest. https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
+scikit-learn, Gaussian mixture model selection. https://scikit-learn.org/stable/auto_examples/mixture/plot_gmm_selection.html
+Hubert and Vandervieren 2008. https://doi.org/10.1016/j.csda.2007.11.008
+Bouman and Heskes 2025. https://arxiv.org/abs/2501.13864
