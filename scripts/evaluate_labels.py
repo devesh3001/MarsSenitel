@@ -1,4 +1,4 @@
-import argparse
+﻿import argparse
 import pandas as pd
 from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, confusion_matrix, classification_report
 import sys
@@ -59,7 +59,7 @@ def evaluate_labels(labels_csv, scores_csv):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Evaluate novelty scores against ground truth labels.")
     parser.add_argument('--labels', required=True, help='Path to the ground truth labels CSV (must have filename and label columns).')
-    parser.add_argument('--scores', default='outputs/v7/mixture_three_sigma_trees2000/novelty_scores.csv', help='Path to the novelty_scores.csv output from the model.')
+    parser.add_argument('--scores', default='outputs/v3/mixture_three_sigma_trees2000/novelty_scores.csv', help='Path to the novelty_scores.csv output from the model.')
     args = parser.parse_args()
     
     evaluate_labels(args.labels, args.scores)

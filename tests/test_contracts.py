@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-from mars_anomaly.model import ConvAutoencoder,ssim_per_image,loss_components
-from mars_anomaly.threshold import upper_fence,calibrate,select_flagged
+from src.model import ConvAutoencoder,ssim_per_image,loss_components
+from src.threshold import upper_fence,calibrate,select_flagged
 
 
 def test_model_shape_and_gradients():
@@ -59,7 +59,7 @@ def test_score_sign():
 
 
 def test_mixture_envelope_covers_all_components():
-    from mars_anomaly.threshold import mixture_fence
+    from src.threshold import mixture_fence
     rng=np.random.default_rng(42)
     values=np.r_[rng.normal(.4,.01,600),rng.normal(.49,.02,400)]
     result=mixture_fence(values,42)

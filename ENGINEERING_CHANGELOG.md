@@ -1,4 +1,4 @@
-# Engineering Changelog
+﻿# Engineering Changelog
 
 > **NSSC 2026 — Mars HiRISE Anomaly Detection**  
 > This changelog follows the **Symptom → Diagnosis → Fix → Outcome** format required by Phase 4.  
@@ -11,7 +11,7 @@
 | Version | Key Change | Val MSE | Val SSIM | Flags | Decision |
 |---------|-----------|---------|----------|-------|----------|
 | v1 | Baseline: 128-dim, MSE only | 0.002694 | 0.6611 | — | Foundation established |
-| v2 | + SSIM loss (0.9 MSE + 0.1 SSIM) | 0.002706 | 0.6717 | — | SSIM improved; retained |
+| v2 | + SSIM loss (0.9 MSE + 0.1 SSIM) | 0.002740 | 0.6717 | — | SSIM improved; retained |
 | v3 | 128-dim → 256-dim bottleneck | 0.002599 | 0.6738 | 17 | ✅ **Canonical reference** |
 | v4 | Contrast normalization preprocessing | — | — | high | Artifacts; not promoted |
 | v5 | + Footprint masking (connected zeros) | — | — | 42 | Too many flags; rejected |
@@ -81,7 +81,7 @@ SSIM implemented from scratch: 11×11 Gaussian window, σ=1.5, data_range=1.0. N
 #### Outcome
 | Metric | v1 | v2 | Change |
 |--------|----|----|--------|
-| Val MSE | 0.002694 | 0.002706 | +0.45% (expected — SSIM trades off MSE) |
+| Val MSE | 0.002694 | 0.002740 | +1.7% (expected — SSIM trades off MSE) |
 | Val SSIM | 0.6611 | 0.6717 | **+1.6%** ✅ |
 
 **Decision:** Retained. The small MSE cost is acceptable for the structural quality gain. The mixed loss is used in all subsequent versions.
@@ -106,7 +106,7 @@ Effective rank analysis of v2's latent covariance showed that the 128 dimensions
 #### Outcome
 | Metric | v2 | v3 | Change |
 |--------|----|----|--------|
-| Val MSE | 0.002706 | 0.002599 | **−3.9%** ✅ |
+| Val MSE | 0.002740 | 0.002599 | **−3.9%** ✅ |
 | Val SSIM | 0.6717 | 0.6738 | +0.3% |
 | Latent effective rank | ~22 | **31/256** | Better spread |
 | Threshold T | — | **0.5425** | GMM BIC=4 components |
@@ -132,7 +132,7 @@ The HiRISE score distribution is **multimodal** (multiple bumps), not the unimod
 1. Fit 1–4 Gaussian components to the calibration scores
 2. Select the number of components by **Bayesian Information Criterion (BIC)**
 3. Compute threshold as: `T = max_j(μ_j + 3σ_j)` (mixture envelope, 3-sigma above each component's tail)
-4. Bootstrap 100 source-group resamples → 95% CI: **[0.533, 0.555]**
+4. Bootstrap 100 source-group resamples → 95% CI: **[0.535, 0.550]**
 
 BIC selected **4 components**. Final threshold: **T = 0.5425**.
 

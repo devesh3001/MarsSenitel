@@ -1,5 +1,5 @@
 import numpy as np
-from mars_anomaly.preprocessing import preprocess_array,border_zero_mask,border_near_black_mask
+from src.preprocessing import preprocess_array,border_zero_mask,border_near_black_mask
 
 
 def test_positive_affine_intensity_invariance_without_floor():

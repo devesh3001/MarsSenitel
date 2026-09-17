@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/800px-OSIRIS_Mars_true_color.jpg" alt="Mars" width="120" style="border-radius:50%; margin-bottom: 20px;"/>
   
   # 🔴 Mars HiRISE: Unsupervised Anomaly Detection
@@ -49,7 +49,7 @@ Fit Gaussian Mixture Model (1-4 components, BIC-selected) to calibration scores.
 ```
 T = max_j ( mu_j + 3 * sigma_j )
 ```
-- 100 source-group bootstrap resamples -> 95% CI: **[0.533, 0.555]**
+- 100 source-group bootstrap resamples -> 95% CI: **[0.535, 0.550]**
 - Final threshold: **T = 0.5425**
 - Zero flags is an accepted outcome — threshold is never manually lowered
 
@@ -74,7 +74,7 @@ Our canonical pipeline (**v3**) identified **17 anomalous crops** from the 10,42
 
 | Metric | Result |
 |--------|--------|
-| **Final Threshold (T)** | **0.5425** *(95% CI: 0.533 to 0.555)* |
+| **Final Threshold (T)** | **0.5425** *(95% CI: 0.535 to 0.550)* |
 | **Flagged Anomalies** | **17 crops** (Top 5 selected for geological hypotheses) |
 | **Validation SSIM** | **0.6738** |
 | **Validation MSE** | **0.002599** |
@@ -145,7 +145,7 @@ jupyter notebook notebooks/Mars_HiRISE_Submission.ipynb
 If you have a ground truth CSV file with labels (containing `filename` and `label` columns, where `label=1` indicates an anomaly), you can easily calculate metrics such as ROC-AUC, PR-AUC, and F1 Score using our provided evaluation script.
 
 ```bash
-# Calculate metrics using the canonical model (v7) output
+# Calculate metrics using the canonical model (v3) output
 python scripts/evaluate_labels.py --labels path/to/your_ground_truth.csv
 ```
 

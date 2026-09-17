@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from mars_anomaly.train import normalized_config, validate_config, TrainConfig
+from src.train import normalized_config, validate_config, TrainConfig
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +89,7 @@ def test_validate_config_raises_on_mismatch():
 
 def test_parse_bool_handles_string_false():
     """parse_bool('False') must return False, not True (the old bug)."""
-    from mars_anomaly.train import parse_bool
+    from src.train import parse_bool
     assert parse_bool('False') is False
     assert parse_bool('false') is False
     assert parse_bool('0') is False

@@ -160,7 +160,7 @@ def main():
     p('The readable Colab notebook contains the preprocessing, model, training and scoring code directly. Completed configurations, checkpoints, manifests, per-epoch histories and numerical tables accompany the analysis. A fresh runtime needs the supplied private dataset ZIP. No pretrained weights or outside training images are used.')
     p('The recorded execution was local. Epoch wall times include interruptions and are not controlled hardware benchmarks. The independent checks are a limited sample of seeds and source assignments. Hidden labels would be needed to establish actual detection performance.')
     p('Private repository access, organizer collaborators and team details remain competition logistics. Local packaging does not submit the project.')
-    target=ROOT/'output/pdf/Mars_HiRISE_Final_Report.pdf';target.parent.mkdir(exist_ok=True,parents=True)
+    target=ROOT/'report/Mars_HiRISE_Final_Report.pdf';target.parent.mkdir(exist_ok=True,parents=True)
     def footer(canvas,doc):
         canvas.setFont('Helvetica',8);canvas.setFillColor(colors.HexColor('#66717b'))
         canvas.drawString(45,26,'NSSC 2026 | Mars imagery | Final analysis')

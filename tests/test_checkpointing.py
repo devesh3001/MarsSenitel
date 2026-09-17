@@ -1,6 +1,6 @@
 import pytest
 import torch
-from mars_anomaly.train import atomic_checkpoint
+from src.train import atomic_checkpoint
 
 
 def test_partial_write_preserves_previous_checkpoint_and_allows_retry(tmp_path, monkeypatch):
