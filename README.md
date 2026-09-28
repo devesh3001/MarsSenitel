@@ -22,8 +22,8 @@
 
 We built a mathematically rigorous system that strictly adheres to the competition constraints:
 
-1. **Built 100% From Scratch:** No pretrained weights (VGG/ResNet) were used. The **5-Stage Convolutional Autoencoder** was designed and trained entirely from scratch, ensuring true latent compression without data leakage.
-2. **Mathematically Honest Thresholding:** We explicitly rejected arbitrary boxplot thresholds. Instead, we used the **Bayesian Information Criterion (BIC)** to dynamically fit a Gaussian Mixture Model (GMM) to the Isolation Forest scores, extracting the anomaly tail mathematically via **100 source-group bootstrap resamples**.
+1. **Built From Scratch:** No pretrained weights (VGG/ResNet) were used. The **5-stage convolutional autoencoder** was trained from random initialization. Source-group splitting keeps crops from the same observation together, reducing one form of leakage.
+2. **Statistical Thresholding:** We rejected the initial adjusted-boxplot threshold after its assumptions failed on the multimodal scores. We used **BIC** to select a Gaussian mixture fitted on calibration scores, then set a fixed three-standard-deviation envelope. **100 source-group bootstrap resamples** estimate threshold uncertainty; they do not establish detection accuracy or a false-positive guarantee.
 3. **Reduced Checkerboard Artifact Risk:** We designed a **resize-convolution decoder** rather than using transposed convolutions. This avoids the uneven-overlap mechanism associated with transposed-convolution checkerboard artifacts and reduces that artifact risk in reconstructions.
 4. **Transparent Ablations (v1–v8):** We documented 14 total runs. We explicitly retained and documented our negative results (e.g., border artifacts in v4, augmentation collapse in v8) to prove scientific rigor.
 
@@ -78,7 +78,9 @@ Our canonical pipeline (**v3**) **flagged 17 candidate crops** from the 10,422 i
 | **Flagged Candidates** | **17 crops** (Top 5 selected for geological hypotheses) |
 | **Validation SSIM** | **0.6738** |
 | **Validation MSE** | **0.002599** |
-| **Forest-Seed Stability** | **> 0.96 Spearman rank** across all repeats |
+| **Fixed-encoder forest repeats** | Spearman **0.9946/0.9947**; flagged-set Jaccard **0.667/0.727** |
+| **Independent training repeats** | Flagged-set Jaccard **0.150/0.294** versus v3; no crop flagged in all three runs |
+| **Known confound** | All five reviewed candidates lie above the **99.7th brightness percentile** |
 | **Total Ablation Runs** | **14** (v1 to v8 + 6 robustness checks) |
 
 ---
@@ -90,7 +92,7 @@ graph TD
     A[Raw Images 227x227] -->|Phase 1| B(ConvAutoencoder)
     B -->|MSE + SSIM Loss| C{256-dim Latent Space}
     C -->|Phase 2| D[2,000-Tree Isolation Forest]
-    D -->|BIC GMM Threshold| E(Novelty Scores)
+    D -->|Score then BIC GMM threshold| E(Novelty Scores)
     E -->|Phase 3| F[Pixel-wise Error Heatmaps]
     F -->|Geological Analysis| G(Anomaly Hypotheses)
     
