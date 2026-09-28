@@ -10,13 +10,13 @@
 
 | Version | Key Change | Val MSE | Val SSIM | Flags | Decision |
 |---------|-----------|---------|----------|-------|----------|
-| v1 | Baseline: 128-dim, MSE only | 0.002694 | 0.6611 | — | Foundation established |
-| v2 | + SSIM loss (0.9 MSE + 0.1 × (1 − SSIM)) | 0.002740 | 0.6717 | — | SSIM improved; retained |
+| v1 | Baseline: 128-dim, MSE only | 0.002694 | 0.6611 | 20 | Foundation established |
+| v2 | + SSIM loss (0.9 MSE + 0.1 × (1 − SSIM)) | 0.002740 | 0.6717 | 9 | SSIM improved; retained |
 | v3 | 128-dim → 256-dim bottleneck | 0.002599 | 0.6738 | 17 | ✅ **Canonical reference** |
 | v4 | Contrast normalization preprocessing | — | — | high | Artifacts; not promoted |
 | v5 | + Footprint masking (connected zeros) | — | — | 42 | Too many flags; rejected |
-| v6 | Near-black border fill (nearest-pixel) | — | — | 0 | Stripe artifacts; negative result |
-| v7 | + Gradient loss term (0.1 weight) | 0.002555 | 0.6746 | 17 | Insufficient; not promoted |
+| v6 | Near-black border fill (nearest-pixel) | 0.009031 | 0.4510 | 78 | Stripe artifacts; negative result |
+| v7 | + Gradient loss term (0.1 weight) | 0.002555 | 0.6746 | 6 | Insufficient; not promoted |
 | v8 | + Geometric augmentation (flips, rotations) | 0.002678 | 0.6686 | 0 | Augmentation hurts; negative result |
 
 ---
@@ -211,13 +211,13 @@ Using a fixed near-black threshold (≤4/255) with a 2-pixel morphological expan
 #### Pre-specified Acceptance Criteria (set before running)
 1. 95th-percentile border response drops by ≥50% vs v3 ✅ (0.030759 → 0.002578)
 2. ≥70% of synthetic bright-square defects *increase* novelty score ❌ (only 30.1%)
-3. Forest flag Jaccard ≥ 0.5 vs independent repeat ❌ (N/A — 0 flags)
+3. Forest flag Jaccard ≥ 0.5 vs independent repeat: not established by the reported v6 checks
 
 #### Outcome
 - Border response reduced ✅
 - But nearest-pixel fill created **conspicuous horizontal/vertical stripes** across the masked region — these stripes were more anomalous than the original border!
-- 0 flags after thresholding — striping actually suppressed genuine novelty scores
-- **Failed 2 of 3 pre-specified criteria → automatically rejected**
+- The independently calibrated v6 run flagged **78 crops** (threshold 0.459716); this count does not establish that any are true anomalies
+- The synthetic-defect response failed its pre-specified gate, and forest flag-set stability was not established; v6 was rejected
 
 **Decision:** ❌ Negative result. Retained with full diagnostics. No threshold was lowered.
 
@@ -283,9 +283,9 @@ The encoded metadata contributes 6 dimensions, giving a 262-dimensional fused ve
 |--------|----|----|--------|
 | Val MSE | 0.002555 | 0.002678 | **+4.8%** ❌ Worse |
 | Val SSIM | 0.6746 | 0.6686 | **−0.9%** ❌ Worse |
-| Image-only flags | 17 | **0** | Complete collapse |
+| Image-only flags | 6 | **0** | No v8 scores crossed its own threshold |
 
-**Interpretation:** Augmentation worsened the measured reconstruction metrics and produced zero thresholded candidates. Altered orientation/illumination cues are a plausible explanation, but this experiment does not establish a unique causal mechanism.
+**Interpretation:** Augmentation worsened the measured reconstruction metrics and produced zero thresholded candidates. Altered orientation/illumination cues are a plausible explanation, but zero flags do not by themselves prove encoder collapse or establish a unique causal mechanism.
 
 #### Outcome — Metadata Fusion
 | Feature | Value |
@@ -312,11 +312,11 @@ The encoded metadata contributes 6 dimensions, giving a 262-dimensional fused ve
 | Criterion | v3 | All others |
 |-----------|----|------------|
 | Selected stability / reconstruction-quality trade-off | ✅ | Later variants did not justify promotion |
-| Stable threshold (GMM BIC) | ✅ Consistent | v4/v5 unstable |
+| Statistical threshold | Defined in advance and bootstrapped; model order at search limit | Each variant recalibrated separately |
 | Fixed-latent forest-repeat stability | Jaccard 0.667/0.727 | v7 seed repeat: 0.417 |
-| Consistent candidate set | ✅ | v4-v8: inconsistent |
-| No disqualifying artifacts | ✅ | v4-v6: border stripes |
-| Honest limitation disclosed | ✅ Brightness bias | — |
+| Independent training repeatability | Jaccard 0.150/0.294; no shared candidate across all three | Remains an open limitation |
+| Input artifacts | Raw images preserve their original photometry | v4-v6 introduced border/fill artifacts |
+| Known confound | All five reviewed candidates are extremely bright | No tested variant proved superior detection |
 
 ---
 
